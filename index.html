@@ -44,9 +44,26 @@
         header h1 {
             margin: 0;
             font-size: 17px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: .2px;
         }
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .title-row h1 { flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; }
+        .title-btn {
+            flex: 0 0 auto;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .title-btn svg { width: 16px; height: 16px; display: block; fill: currentColor; }
         header p {
             margin: 6px 0 0;
             font-size: 12.5px;
@@ -244,6 +261,36 @@
         dialog h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
         dialog .hint { margin: 0 0 14px; }
         #export-system-note { margin: -6px 0 12px; color: var(--ink); opacity: .85; }
+
+        #manual-dialog {
+            padding: 0;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink);
+            border-radius: 16px;
+            width: min(440px, calc(100vw - 32px));
+            max-height: 82vh;
+        }
+        #manual-dialog[open] { display: flex; flex-direction: column; }
+        .manual-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+        }
+        .manual-head h3 { margin: 0; font-size: 14px; font-weight: 600; }
+        .manual-head .icon { width: 30px; height: 30px; }
+        .manual-body { padding: 14px 16px 18px; overflow-y: auto; }
+        .manual-body .hint { margin: 0 0 12px; }
+        .manual-list { margin: 0; }
+        .manual-list dt { font-size: 12.5px; font-weight: 600; margin-top: 12px; }
+        .manual-list dt:first-child { margin-top: 0; }
+        .manual-list dd { margin: 2px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+        .manual-body h4 { margin: 18px 0 0; font-size: 12.5px; font-weight: 600; }
+        .manual-tips { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+        .manual-tips li { margin-bottom: 6px; }
         .choice {
             display: flex;
             flex-direction: column;
@@ -337,7 +384,12 @@
 
     <div class="wrap">
         <header>
-            <h1 data-i18n="title">Firefight 字体图片生成器</h1>
+            <div class="title-row">
+                <h1 data-i18n="title">Firefight 字体图片生成器</h1>
+                <button id="manual-btn" class="title-btn" type="button" data-i18n-aria="manualTitle" title="用户手册">
+                    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"/></svg>
+                </button>
+            </div>
             <p data-i18n="subtitle">载入 .ttf / .otf 字体，导出 Firefight 可读取的字体图集 PNG，用于替换游戏内字体。</p>
         </header>
 
@@ -453,6 +505,19 @@
         <button type="button" class="cancel" id="export-cancel" data-i18n="cancel">取消</button>
     </dialog>
 
+    <dialog id="manual-dialog">
+        <div class="manual-head">
+            <h3 data-i18n="manualTitle">用户手册</h3>
+            <button class="icon" id="manual-close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="manual-body">
+            <p class="hint" data-i18n="manualIntro">每个控件的作用，按界面从上到下排列。</p>
+            <dl class="manual-list" id="manual-list"></dl>
+            <h4 data-i18n="manualTipsTitle">建议</h4>
+            <ul class="manual-tips" id="manual-tips"></ul>
+        </div>
+    </dialog>
+
     <script>
         // 新版排版与原版字体图一致：U+0020 起按字节顺序排到 U+00FE，
         // 0x80-0x9F 取 Windows-1252 字形；原版图里没有字形的那几格保持空白
@@ -528,6 +593,28 @@
                 cancel: '取消',
                 footer: '由 DeepSeek 大肥鱼 生成',
                 disclaimer: '非官方第三方工具，与游戏开发商、发行商无关；修改游戏文件的风险由使用者自行承担。',
+                manualTitle: '用户手册',
+                manualIntro: '每个控件的作用，按界面从上到下排列。',
+                manualTipsTitle: '建议',
+                manualItems: [
+                    { term: '载入字体', desc: '选择一个 .ttf / .otf 文件，用它渲染整张图集；也可以不载入，直接导出会用设备系统字体。' },
+                    { term: '清除字体', desc: '卸载当前字体并删除浏览器里保存的副本，回落到系统字体，图集、预览、导出都不受影响。' },
+                    { term: '下载 PNG', desc: '选择 512 / 1024 或两者；只有一个文件时直接下载 PNG，多个文件会打包成一个 font_image.zip。' },
+                    { term: '字号', desc: '整体字号。可以直接填 px（如 48），也可以填放大倍率（1.5 = 48px），两种写法共用这一个输入框。' },
+                    { term: '字重', desc: '常规 / 加粗。加粗由浏览器合成，效果见文末建议。' },
+                    { term: '排版', desc: '新版：与原版图集一致，从 U+0020 按字节排到 U+00FE，其中 0x80–0x9F 取 Windows-1252 字形。旧版：ASCII 之后补 34 个空格，再接 Latin-1。' },
+                    { term: '字色', desc: '图集中字形的颜色。页面背景会跟着变深或变浅方便看清，导出的 PNG 始终是透明底。' },
+                    { term: '字符预览', desc: '点上方图集里的任意一格即可选中该字符，‹ › 切换上一个 / 下一个；这里显示放大后的效果和实际尺寸。' },
+                    { term: '拉宽 / 拉高', desc: '只影响当前字符，按 px 增减字形外框的宽高，可以填负数。' },
+                    { term: '水平位移 / 垂直位移', desc: '在当前字符的格子里平移，正数向右 / 向下。' },
+                    { term: '裁剪到格内', desc: '超出 32×32 格子的部分会被裁掉；预览里标红的区域就是会被裁掉的部分。' },
+                    { term: '重置此字 / 重置全部', desc: '清掉当前字符 / 所有字符的变形设置。' },
+                    { term: '右上角图标', desc: '书图标就是本手册；旁边的圆形图标用来切换 中文 / English / Русский。' }
+                ],
+                manualTips: [
+                    '建议使用等宽字体：游戏内的 typewriter（打字机文本）统一使用等宽字体，非等宽字体可能导致部分字母错位或观感不佳。',
+                    '网页端的加粗是浏览器合成出来的，效果可能不理想；如果字体包自带加粗字重，建议直接载入字体包里的加粗字体。'
+                ],
                 infoHint: '点击上方画布中的字符格进行预览',
                 infoNoFont: '（字体未载入，当前为回退字体）',
                 infoBlank: function (i) { return '索引 ' + i + ' · 空白格'; },
@@ -575,6 +662,28 @@
                 cancel: 'Cancel',
                 footer: 'Made by DeepSeek 大肥鱼',
                 disclaimer: 'Unofficial third-party tool, not affiliated with the game developer or publisher. Modifying game files is at your own risk.',
+                manualTitle: 'User manual',
+                manualIntro: 'What each control does, top to bottom.',
+                manualTipsTitle: 'Notes',
+                manualItems: [
+                    { term: 'Load font', desc: 'Pick a .ttf / .otf file to render the atlas. You can also skip it — exporting without a font uses the device system font.' },
+                    { term: 'Clear font', desc: 'Unloads the current font and deletes the copy saved in the browser, falling back to the system font.' },
+                    { term: 'Download PNG', desc: 'Choose 512 / 1024 or both. A single file downloads as PNG; multiple files are packed into one font_image.zip.' },
+                    { term: 'Size', desc: 'Overall font size. Enter px (e.g. 48) or a scale factor (1.5 = 48px) — both share this one field.' },
+                    { term: 'Weight', desc: 'Regular / Bold. Bold is synthesized by the browser — see the notes below.' },
+                    { term: 'Layout', desc: 'New: byte order U+0020–U+00FE as in the original atlas, with 0x80–0x9F taken from Windows-1252. Legacy: ASCII + 34 spaces + Latin-1.' },
+                    { term: 'Color', desc: 'Glyph color in the atlas. The page background shifts to keep it readable; exported PNGs always have a transparent background.' },
+                    { term: 'Glyph preview', desc: 'Click any cell in the atlas to select it; ‹ › step through characters. Shows the enlarged glyph and its real size.' },
+                    { term: 'Width / Height', desc: 'Affects only the selected glyph: grows or shrinks its ink box in px. Negative values are allowed.' },
+                    { term: 'Offset X / Y', desc: 'Moves the glyph inside its cell; positive values go right / down.' },
+                    { term: 'Clip to cell', desc: 'Anything outside the 32×32 cell is cut off; the red areas in the preview show what gets clipped.' },
+                    { term: 'Reset glyph / Reset all', desc: 'Clears the transforms of the current glyph / of every glyph.' },
+                    { term: 'Top-right icons', desc: 'The book icon opens this manual; the round icon next to it switches 中文 / English / Русский.' }
+                ],
+                manualTips: [
+                    'Use a monospaced font: the in-game typewriter text is monospaced, and a proportional font can make letters misalign or look off.',
+                    'Bold is synthesized by the browser and may look poor; if your font package includes a bold weight, load that file instead.'
+                ],
                 infoHint: 'Tap a cell on the canvas above to preview',
                 infoNoFont: '(no font loaded, showing fallback)',
                 infoBlank: function (i) { return 'index ' + i + ' · empty cell'; },
@@ -622,6 +731,28 @@
                 cancel: 'Отмена',
                 footer: 'Сделано DeepSeek 大肥鱼',
                 disclaimer: 'Неофициальный сторонний инструмент, не связан с разработчиком или издателем игры. Изменение файлов игры — на ваш риск.',
+                manualTitle: 'Руководство',
+                manualIntro: 'Что делает каждый элемент интерфейса — сверху вниз.',
+                manualTipsTitle: 'Рекомендации',
+                manualItems: [
+                    { term: 'Загрузить шрифт', desc: 'Выберите файл .ttf / .otf для отрисовки атласа. Можно не загружать — тогда экспорт пойдёт системным шрифтом.' },
+                    { term: 'Убрать шрифт', desc: 'Выгружает текущий шрифт и удаляет его копию из браузера, возвращаясь к системному.' },
+                    { term: 'Скачать PNG', desc: 'Выберите 512 / 1024 или оба. Один файл скачивается как PNG, несколько упаковываются в один font_image.zip.' },
+                    { term: 'Кегль', desc: 'Общий размер шрифта: в px (например 48) или множителем (1.5 = 48px) — это одно поле.' },
+                    { term: 'Насыщенность', desc: 'Обычный / Жирный. Жирный синтезируется браузером — см. рекомендации ниже.' },
+                    { term: 'Раскладка', desc: 'Новая: порядок байтов U+0020–U+00FE как в оригинальном атласе, 0x80–0x9F из Windows-1252. Старая: ASCII + 34 пробела + Latin-1.' },
+                    { term: 'Цвет', desc: 'Цвет глифов в атласе. Фон страницы подстраивается для читаемости; PNG всегда с прозрачным фоном.' },
+                    { term: 'Просмотр символа', desc: 'Нажмите ячейку в атласе, чтобы выбрать символ; ‹ › переключают соседние. Показывает увеличенный глиф и его размер.' },
+                    { term: 'Ширина / Высота', desc: 'Меняют только выбранный символ: контур глифа в px, можно отрицательные значения.' },
+                    { term: 'Сдвиг X / Y', desc: 'Сдвигает символ внутри его ячейки; плюс — вправо / вниз.' },
+                    { term: 'Обрезать по ячейке', desc: 'Всё, что выходит за ячейку 32×32, обрезается; красные области в просмотре показывают, что будет отрезано.' },
+                    { term: 'Сбросить символ / всё', desc: 'Очищает деформации текущего символа / всех символов.' },
+                    { term: 'Иконки справа сверху', desc: 'Иконка книги открывает это руководство; круглая иконка рядом переключает 中文 / English / Русский.' }
+                ],
+                manualTips: [
+                    'Рекомендуется моноширинный шрифт: текст «печатной машинки» в игре моноширинный, иначе буквы могут разъехаться или выглядеть хуже.',
+                    'Жирность синтезируется браузером и может выглядеть плохо; если в наборе шрифта есть жирное начертание, загрузите его.'
+                ],
                 infoHint: 'Нажмите ячейку на холсте выше',
                 infoNoFont: '(шрифт не загружен, показан системный)',
                 infoBlank: function (i) { return 'индекс ' + i + ' · пустая ячейка'; },
@@ -670,7 +801,29 @@
             syncLabelWidth();
             updateFontLabel();
             updateInfo();
+            renderManual();
             if (!options || !options.silent) saveSettings();
+        }
+
+        function renderManual() {
+            const list = el('manual-list');
+            const tips = el('manual-tips');
+            el('manual-btn').setAttribute('title', t('manualTitle'));
+            list.textContent = '';
+            tips.textContent = '';
+            (t('manualItems') || []).forEach(function (item) {
+                const term = document.createElement('dt');
+                term.textContent = item.term;
+                const desc = document.createElement('dd');
+                desc.textContent = item.desc;
+                list.appendChild(term);
+                list.appendChild(desc);
+            });
+            (t('manualTips') || []).forEach(function (text) {
+                const li = document.createElement('li');
+                li.textContent = text;
+                tips.appendChild(li);
+            });
         }
 
         const CHAR_WIDTH = 32;
@@ -1415,6 +1568,14 @@
         });
 
         el('clear-font-btn').addEventListener('click', clearFont);
+
+        el('manual-btn').addEventListener('click', function () {
+            el('manual-dialog').showModal();
+        });
+
+        el('manual-close').addEventListener('click', function () {
+            el('manual-dialog').close();
+        });
 
         el('prev-char').addEventListener('click', function () { selectIndex(selectedIndex - 1); });
         el('next-char').addEventListener('click', function () { selectIndex(selectedIndex + 1); });
