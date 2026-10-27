@@ -285,6 +285,8 @@
         .manual-body { padding: 14px 16px 18px; overflow-y: auto; }
         .manual-body .hint { margin: 0 0 12px; }
         .manual-list { margin: 0; }
+        .manual-list > div { margin-top: 14px; }
+        .manual-list > div:first-child { margin-top: 0; }
         .manual-list dt { font-size: 12.5px; font-weight: 600; margin-top: 12px; }
         .manual-list dt:first-child { margin-top: 0; }
         .manual-list dd { margin: 2px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
@@ -361,6 +363,255 @@
         .site-footer svg { width: 15px; height: 15px; display: block; opacity: .85; }
         .footer-note { margin: 0; max-width: 32em; font-size: 11px; line-height: 1.55; opacity: .78; }
 
+        /* ---------- 手册按钮 ---------- */
+        .title-btn {
+            width: auto;
+            height: 28px;
+            padding: 0 11px 0 9px;
+            border-radius: 999px;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+        .title-btn:hover:not(:disabled) { color: var(--ink); }
+        .title-btn svg { width: 14px; height: 14px; }
+
+        /* ---------- 自定义下拉 ---------- */
+        .dropdown { position: relative; justify-self: start; }
+        .dropdown-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-width: 9.5em;
+            padding: 7px 10px;
+            font-size: 13px;
+        }
+        .dropdown-trigger .chev { width: 12px; height: 12px; fill: currentColor; transition: transform .2s ease; }
+        .dropdown.open .dropdown-trigger .chev { transform: rotate(180deg); }
+        .dropdown-menu {
+            position: absolute;
+            left: 0;
+            top: calc(100% + 6px);
+            min-width: 100%;
+            padding: 5px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, .16);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px) scale(.97);
+            transform-origin: top left;
+            pointer-events: none;
+            transition: opacity .16s ease, transform .16s ease, visibility .16s;
+            z-index: 12;
+        }
+        .dropdown.open .dropdown-menu { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+        .dropdown-menu button {
+            display: block;
+            width: 100%;
+            border: 0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 12.5px;
+            white-space: nowrap;
+            color: var(--ink);
+        }
+        .dropdown-menu button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+
+        /* ---------- 分段控件滑动指示 ---------- */
+        .seg { position: relative; }
+        .seg-pill {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            border-radius: 8px;
+            background: var(--accent);
+            transition: transform .24s cubic-bezier(.34, .9, .3, 1), width .24s cubic-bezier(.34, .9, .3, 1);
+        }
+        .seg button { position: relative; z-index: 1; background: transparent; transition: color .2s ease; }
+        .seg button[aria-pressed="true"] { background: transparent; color: var(--accent-ink); }
+
+        /* ---------- 勾选框 ---------- */
+        .check { position: relative; }
+        .check > input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            margin: 0;
+            pointer-events: none;
+        }
+        .cb {
+            flex: 0 0 auto;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            display: inline-block;
+            position: relative;
+            transition: background .18s ease, border-color .18s ease, transform .12s ease;
+        }
+        .cb::after {
+            content: '';
+            position: absolute;
+            left: 4.5px;
+            top: 1.5px;
+            width: 5px;
+            height: 9px;
+            border: solid var(--accent-ink);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg) scale(0);
+            transition: transform .2s cubic-bezier(.2, 1.5, .5, 1);
+        }
+        .check > input:checked + .cb { background: var(--accent); border-color: var(--accent); }
+        .check > input:checked + .cb::after { transform: rotate(45deg) scale(1); }
+        .check:active .cb { transform: scale(.88); }
+
+        /* ---------- 取色器 ---------- */
+        .color-wrap { position: relative; }
+        .swatch {
+            width: 34px;
+            height: 34px;
+            padding: 3px;
+            border-radius: 9px;
+            border: 1px solid var(--line);
+            background: transparent;
+        }
+        .swatch-fill {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            background: #fff;
+            transition: background .2s ease;
+        }
+        .cp-panel {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 8px);
+            padding: 12px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, .2);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px) scale(.98);
+            transform-origin: top center;
+            pointer-events: none;
+            transition: opacity .18s ease, transform .18s cubic-bezier(.3, .9, .3, 1), visibility .18s;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .cp-panel.open { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+        .cp-area {
+            position: relative;
+            height: 128px;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: crosshair;
+            background: hsl(0, 100%, 50%);
+        }
+        .cp-area::before,
+        .cp-area::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+        .cp-area::before { background: linear-gradient(to right, #fff, transparent); }
+        .cp-area::after { background: linear-gradient(to top, #000, transparent); }
+        .cp-dot {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            margin: -7px 0 0 -7px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .3);
+            pointer-events: none;
+            transition: left .06s linear, top .06s linear;
+        }
+        .cp-hue {
+            width: 100%;
+            height: 14px;
+            padding: 0;
+            border: 0;
+            border-radius: 999px;
+            appearance: none;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+        }
+        .cp-hue::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--ink);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+        }
+        .cp-swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+        .cp-swatches button {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            padding: 0;
+            border-radius: 7px;
+            border: 1px solid var(--line);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .cp-swatches button:hover { transform: translateY(-2px); }
+        .cp-swatches button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--ink); }
+        .cp-fields { display: flex; flex-direction: column; gap: 6px; }
+        .cp-row { display: flex; align-items: center; gap: 6px; }
+        .cp-row > span { font-size: 10.5px; color: var(--muted); width: 1.1em; text-align: center; flex: 0 0 auto; }
+        .cp-row > input {
+            flex: 1 1 0;
+            min-width: 0;
+            padding: 5px 4px;
+            font-size: 11.5px;
+            text-align: center;
+            border-radius: 7px;
+        }
+        .cp-row > .cp-tag { width: auto; font-size: 10px; letter-spacing: .3px; }
+
+        /* ---------- 弹窗动画 ---------- */
+        dialog { opacity: 0; transform: translateY(10px) scale(.985); transition: opacity .18s ease, transform .18s cubic-bezier(.3, .9, .3, 1); }
+        dialog[open].is-open { opacity: 1; transform: none; }
+        dialog::backdrop { opacity: 0; transition: opacity .18s ease; }
+        dialog[open].is-open::backdrop { opacity: 1; }
+
+        /* ---------- 语言菜单动画 ---------- */
+        .lang-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px) scale(.96);
+            transform-origin: top right;
+            pointer-events: none;
+            transition: opacity .16s ease, transform .16s ease, visibility .16s;
+        }
+        .lang-menu.open { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+
+        /* ---------- 手册里的控件示意 ---------- */
+        .manual-mock {
+            margin: 8px 0 6px;
+            padding: 9px 11px;
+            border: 1px dashed var(--line);
+            border-radius: 10px;
+            pointer-events: none;
+            user-select: none;
+        }
+        .manual-mock .control { gap: 8px; }
+        .manual-mock .dropdown-menu,
+        .manual-mock .cp-panel { display: none !important; }
+        .manual-mock .seg-pill { display: none; }
+        .manual-mock .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+        .manual-mock canvas { max-width: 76px; border-radius: 6px; }
+
         @media (max-width: 420px) {
             .wrap { padding: 20px 12px 40px; }
             .control { gap: 8px; }
@@ -375,7 +626,7 @@
         <button id="lang-btn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Language">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
         </button>
-        <div class="lang-menu" id="lang-menu" hidden>
+        <div class="lang-menu" id="lang-menu" aria-hidden="true">
             <button type="button" data-lang="zh">中文</button>
             <button type="button" data-lang="en">English</button>
             <button type="button" data-lang="ru">Русский</button>
@@ -388,6 +639,7 @@
                 <h1 data-i18n="title">Firefight 字体图片生成器</h1>
                 <button id="manual-btn" class="title-btn" type="button" data-i18n-aria="manualTitle" title="用户手册">
                     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"/></svg>
+                    <span data-i18n="manualTitle">用户手册</span>
                 </button>
             </div>
             <p data-i18n="subtitle">载入 .ttf / .otf 字体，导出 Firefight 可读取的字体图集 PNG，用于替换游戏内字体。</p>
@@ -413,23 +665,44 @@
             <div class="control weight">
                 <label data-i18n="weight">字重</label>
                 <div class="seg" id="weight-seg">
+                    <span class="seg-pill" aria-hidden="true"></span>
                     <button type="button" data-bold="0" aria-pressed="true" data-i18n="regular">常规</button>
                     <button type="button" data-bold="1" aria-pressed="false" data-i18n="bold">加粗</button>
                 </div>
             </div>
 
             <div class="control weight">
-                <label for="layout-select" data-i18n="layout">排版</label>
-                <select id="layout-select">
-                    <option value="cp1252" data-i18n="layoutNew">新版（0x20–0xFE）</option>
-                    <option value="legacy" data-i18n="layoutLegacy">旧版（Latin-1）</option>
-                </select>
+                <label data-i18n="layout">排版</label>
+                <div class="dropdown" id="layout-dropdown">
+                    <button class="dropdown-trigger" id="layout-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                        <span id="layout-value">新版（0x20–0xFE）</span>
+                        <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 6.3a.75.75 0 0 1 1.06-.04L8 8.8l2.74-2.54a.75.75 0 1 1 1.02 1.1l-3.25 3.02a.75.75 0 0 1-1.02 0L4.24 7.36a.75.75 0 0 1-.04-1.06Z"/></svg>
+                    </button>
+                    <div class="dropdown-menu" id="layout-menu" role="listbox">
+                        <button type="button" role="option" data-layout="cp1252" data-i18n="layoutNew">新版（0x20–0xFE）</button>
+                        <button type="button" role="option" data-layout="legacy" data-i18n="layoutLegacy">旧版（Latin-1）</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="control color">
-                <label for="text-color-picker" data-i18n="color">字色</label>
-                <input type="color" id="text-color-picker" value="#ffffff">
-                <input type="text" id="hex-input" value="#ffffff" spellcheck="false" autocomplete="off" autocapitalize="off">
+            <div class="color-wrap">
+                <div class="control color">
+                    <label data-i18n="color">字色</label>
+                    <button class="swatch" id="color-trigger" type="button" aria-haspopup="true" aria-expanded="false" data-i18n-aria="color">
+                        <span class="swatch-fill" id="swatch-fill"></span>
+                    </button>
+                    <input type="text" id="hex-input" value="#ffffff" spellcheck="false" autocomplete="off" autocapitalize="off">
+                </div>
+                <div class="cp-panel" id="cp-panel">
+                    <div class="cp-area" id="cp-area"><span class="cp-dot" id="cp-dot"></span></div>
+                    <input type="range" class="cp-hue" id="cp-hue" min="0" max="360" step="1" value="0">
+                    <div class="cp-swatches" id="cp-swatches"></div>
+                    <div class="cp-fields">
+                        <div class="cp-row"><span class="cp-tag">RGB</span><span>R</span><input type="number" id="cp-r" min="0" max="255" step="1" inputmode="numeric"><span>G</span><input type="number" id="cp-g" min="0" max="255" step="1" inputmode="numeric"><span>B</span><input type="number" id="cp-b" min="0" max="255" step="1" inputmode="numeric"></div>
+                        <div class="cp-row"><span class="cp-tag">HSV</span><span>H</span><input type="number" id="cp-h" min="0" max="360" step="1" inputmode="numeric"><span>S</span><input type="number" id="cp-s" min="0" max="100" step="1" inputmode="numeric"><span>V</span><input type="number" id="cp-v" min="0" max="100" step="1" inputmode="numeric"></div>
+                        <div class="cp-row"><span class="cp-tag">CMYK</span><span>C</span><input type="number" id="cp-c" min="0" max="100" step="1" inputmode="numeric"><span>M</span><input type="number" id="cp-m" min="0" max="100" step="1" inputmode="numeric"><span>Y</span><input type="number" id="cp-y" min="0" max="100" step="1" inputmode="numeric"><span>K</span><input type="number" id="cp-k" min="0" max="100" step="1" inputmode="numeric"></div>
+                    </div>
+                </div>
             </div>
             <p class="hint" data-i18n="colorHint">页面背景随字色自动变深或变浅；导出图片始终是透明背景。</p>
 
@@ -471,7 +744,7 @@
             <p class="hint" data-i18n="tfHint">单位 px：拉宽 / 拉高改变字形外框尺寸，位移正数向右、向下。</p>
 
             <div class="row between">
-                <label class="check"><input type="checkbox" id="clip-toggle" checked> <span data-i18n="clip">裁剪到格内</span></label>
+                <label class="check"><input type="checkbox" id="clip-toggle" checked><span class="cb" aria-hidden="true"></span><span data-i18n="clip">裁剪到格内</span></label>
                 <div class="row tight">
                     <button id="reset-char-btn" type="button" disabled data-i18n="resetChar">重置此字</button>
                     <button id="reset-all-btn" type="button" disabled data-i18n="resetAll">重置全部</button>
@@ -492,7 +765,7 @@
         <h3 data-i18n="exportTitle">导出分辨率</h3>
         <p class="hint" data-i18n="exportHint">导出正方形、透明背景的 PNG。</p>
         <p class="hint" id="export-system-note" data-i18n="exportSystemNote" hidden>未载入字体，将用系统字体导出。</p>
-        <label class="check dialog-check"><input type="checkbox" id="export-both-weights"> <span data-i18n="exportBothWeights">同时导出常规 + 加粗</span></label>
+        <label class="check dialog-check"><input type="checkbox" id="export-both-weights"><span class="cb" aria-hidden="true"></span><span data-i18n="exportBothWeights">同时导出常规 + 加粗</span></label>
         <button type="button" class="choice" data-choice="512">
             <strong>512 × 512</strong><span data-i18n="resOriginal">图集原始尺寸</span>
         </button>
@@ -603,7 +876,7 @@
                     { term: '字号', desc: '整体字号。可以直接填 px（如 48），也可以填放大倍率（1.5 = 48px），两种写法共用这一个输入框。' },
                     { term: '字重', desc: '常规 / 加粗。加粗由浏览器合成，效果见文末建议。' },
                     { term: '排版', desc: '新版：与原版图集一致，从 U+0020 按字节排到 U+00FE，其中 0x80–0x9F 取 Windows-1252 字形。旧版：ASCII 之后补 34 个空格，再接 Latin-1。' },
-                    { term: '字色', desc: '图集中字形的颜色。页面背景会跟着变深或变浅方便看清，导出的 PNG 始终是透明底。' },
+                    { term: '字色', desc: '图集中字形的颜色。页面背景会跟着变深或变浅方便看清，导出的 PNG 始终是透明底。点色块展开取色面板，可用推荐颜色、色相滑杆或 RGB / HSV / CMYK 数值调整。' },
                     { term: '字符预览', desc: '点上方图集里的任意一格即可选中该字符，可用于对部分字符的微调，‹ › 切换上一个 / 下一个；这里显示放大后的效果和实际尺寸。' },
                     { term: '拉宽 / 拉高', desc: '只影响当前字符，按 px 增减字形外框的宽高，可以填负数。' },
                     { term: '水平位移 / 垂直位移', desc: '在当前字符的格子里平移，正数向右 / 向下。' },
@@ -613,8 +886,8 @@
                 ],
                 manualTips: [
                     '建议使用等宽字体：游戏内的 typewriter（打字机文本）统一使用等宽字体，非等宽字体可能导致部分字母错位或观感不佳。',
-                    '网页端的加粗是浏览器合成出来的，效果可能不理想；如果字体包自带加粗字重，建议直接载入字体包里的加粗字体。'
-                    '建议使用作为导出格式。新旧版区别是旧版部分空置的索引在新版添加了字符。使用新版排版应用于旧版理论上没有大问题，但并不能保证。如果不确定游戏中使用的新版排版还是旧版排版可在安装包中检查字符排版情况。'
+                    '网页端的加粗是浏览器合成出来的，效果可能不理想；如果字体包自带加粗字重，建议直接载入字体包里的加粗字体。',
+                    '建议优先使用新版排版导出。新旧版区别是：旧版部分空置的索引在新版里被填上了字符。新版排版用在旧版上理论上没有大问题，但并不能保证。如果不确定游戏用的是新版还是旧版排版，可在安装包里检查字符排版情况。'
                 ],
                 infoHint: '点击上方画布中的字符格进行预览',
                 infoNoFont: '（字体未载入，当前为回退字体）',
@@ -673,7 +946,7 @@
                     { term: 'Size', desc: 'Overall font size. Enter px (e.g. 48) or a scale factor (1.5 = 48px) — both share this one field.' },
                     { term: 'Weight', desc: 'Regular / Bold. Bold is synthesized by the browser — see the notes below.' },
                     { term: 'Layout', desc: 'New: byte order U+0020–U+00FE as in the original atlas, with 0x80–0x9F taken from Windows-1252. Legacy: ASCII + 34 spaces + Latin-1.' },
-                    { term: 'Color', desc: 'Glyph color in the atlas. The page background shifts to keep it readable; exported PNGs always have a transparent background.' },
+                    { term: 'Color', desc: 'Glyph color in the atlas. The page background shifts to keep it readable; exported PNGs always have a transparent background. Click the color chip to open the picker: presets, a hue slider, or RGB / HSV / CMYK values.' },
                     { term: 'Glyph preview', desc: 'Click any cell in the atlas to select that character — useful for fine-tuning individual glyphs. ‹ › step through characters; shows the enlarged glyph and its real size.' },
                     { term: 'Width / Height', desc: 'Affects only the selected glyph: grows or shrinks its ink box in px. Negative values are allowed.' },
                     { term: 'Offset X / Y', desc: 'Moves the glyph inside its cell; positive values go right / down.' },
@@ -683,7 +956,8 @@
                 ],
                 manualTips: [
                     'Use a monospaced font: the in-game typewriter text is monospaced, and a proportional font can make letters misalign or look off.',
-                    'Bold is synthesized by the browser and may look poor; if your font package includes a bold weight, load that file instead.'
+                    'Bold is synthesized by the browser and may look poor; if your font package includes a bold weight, load that file instead.',
+                    'Prefer exporting with the new layout. The difference: some indices that were empty in the old layout contain characters in the new one. Using the new layout on an old version is usually fine in theory, but not guaranteed. If you are unsure which layout the game uses, check the character layout inside the installation package.'
                 ],
                 infoHint: 'Tap a cell on the canvas above to preview',
                 infoNoFont: '(no font loaded, showing fallback)',
@@ -742,7 +1016,7 @@
                     { term: 'Кегль', desc: 'Общий размер шрифта: в px (например 48) или множителем (1.5 = 48px) — это одно поле.' },
                     { term: 'Насыщенность', desc: 'Обычный / Жирный. Жирный синтезируется браузером — см. рекомендации ниже.' },
                     { term: 'Раскладка', desc: 'Новая: порядок байтов U+0020–U+00FE как в оригинальном атласе, 0x80–0x9F из Windows-1252. Старая: ASCII + 34 пробела + Latin-1.' },
-                    { term: 'Цвет', desc: 'Цвет глифов в атласе. Фон страницы подстраивается для читаемости; PNG всегда с прозрачным фоном.' },
+                    { term: 'Цвет', desc: 'Цвет глифов в атласе. Фон страницы подстраивается для читаемости; PNG всегда с прозрачным фоном. Нажмите на цветной квадрат — откроется палитра с готовыми цветами, ползунком тона и полями RGB / HSV / CMYK.' },
                     { term: 'Просмотр символа', desc: 'Нажмите ячейку в атласе, чтобы выбрать символ, — удобно для точной правки отдельных глифов. ‹ › переключают соседние; показывает увеличенный глиф и его размер.' },
                     { term: 'Ширина / Высота', desc: 'Меняют только выбранный символ: контур глифа в px, можно отрицательные значения.' },
                     { term: 'Сдвиг X / Y', desc: 'Сдвигает символ внутри его ячейки; плюс — вправо / вниз.' },
@@ -752,7 +1026,8 @@
                 ],
                 manualTips: [
                     'Рекомендуется моноширинный шрифт: текст «печатной машинки» в игре моноширинный, иначе буквы могут разъехаться или выглядеть хуже.',
-                    'Жирность синтезируется браузером и может выглядеть плохо; если в наборе шрифта есть жирное начертание, загрузите его.'
+                    'Жирность синтезируется браузером и может выглядеть плохо; если в наборе шрифта есть жирное начертание, загрузите его.',
+                    'Советуем экспортировать в новой раскладке. Разница: часть индексов, пустых в старой версии, в новой заполнена символами. Новая раскладка на старой версии теоретически не должна давать проблем, но гарантий нет. Если не знаете, какая раскладка используется в игре, проверьте расположение символов в установочном пакете.'
                 ],
                 infoHint: 'Нажмите ячейку на холсте выше',
                 infoNoFont: '(шрифт не загружен, показан системный)',
@@ -800,10 +1075,53 @@
                 button.setAttribute('aria-current', String(button.dataset.lang === currentLang));
             });
             syncLabelWidth();
+            syncLayoutUI();
+            positionSegPill();
             updateFontLabel();
             updateInfo();
             renderManual();
             if (!options || !options.silent) saveSettings();
+        }
+
+        const MANUAL_MOCKS = ['load', 'clear', 'download', 'size', 'weight', 'layout', 'color', 'preview', 'tfWH', 'tfXY', 'clip', 'reset', 'icons'];
+
+        // 把主界面的控件克隆一份放进手册，方便对照
+        function createManualMock(key) {
+            if (key === 'icons') {
+                const row = document.createElement('div');
+                row.className = 'row tight manual-mock';
+                row.appendChild(el('manual-btn').cloneNode(true));
+                row.appendChild(el('lang-btn').cloneNode(true));
+                row.querySelectorAll('[id]').forEach(function (node) { node.removeAttribute('id'); });
+                row.inert = true;
+                return row;
+            }
+            let source = null;
+            if (key === 'load') source = document.querySelector('.file');
+            else if (key === 'clear') source = el('clear-font-btn');
+            else if (key === 'download') source = el('download-btn');
+            else if (key === 'size') source = document.querySelector('.control.size');
+            else if (key === 'weight') source = el('weight-seg').parentElement;
+            else if (key === 'layout') source = el('layout-dropdown').parentElement;
+            else if (key === 'color') source = document.querySelector('.control.color');
+            else if (key === 'preview') source = el('preview');
+            else if (key === 'tfWH') source = document.querySelectorAll('.control.tf')[0];
+            else if (key === 'tfXY') source = document.querySelectorAll('.control.tf')[2];
+            else if (key === 'clip') source = document.querySelector('.check');
+            else if (key === 'reset') source = el('reset-all-btn').parentElement;
+            if (!source) return null;
+
+            const clone = source.cloneNode(true);
+            clone.querySelectorAll('[id]').forEach(function (node) { node.removeAttribute('id'); });
+            clone.removeAttribute('id');
+            clone.classList.add('manual-mock');
+            clone.querySelectorAll('.dropdown-menu, .cp-panel').forEach(function (node) { node.remove(); });
+            if (key === 'preview') {
+                const ctx = clone.getContext('2d');
+                if (ctx) ctx.drawImage(source, 0, 0);
+            }
+            clone.inert = true;
+            return clone;
         }
 
         function renderManual() {
@@ -812,13 +1130,17 @@
             el('manual-btn').setAttribute('title', t('manualTitle'));
             list.textContent = '';
             tips.textContent = '';
-            (t('manualItems') || []).forEach(function (item) {
+            (t('manualItems') || []).forEach(function (item, index) {
+                const wrap = document.createElement('div');
                 const term = document.createElement('dt');
                 term.textContent = item.term;
                 const desc = document.createElement('dd');
                 desc.textContent = item.desc;
-                list.appendChild(term);
-                list.appendChild(desc);
+                wrap.appendChild(term);
+                wrap.appendChild(desc);
+                const mock = createManualMock(MANUAL_MOCKS[index]);
+                if (mock) wrap.appendChild(mock);
+                list.appendChild(wrap);
             });
             (t('manualTips') || []).forEach(function (text) {
                 const li = document.createElement('li');
@@ -868,7 +1190,6 @@
         const previewInfo = el('preview-info');
         const sizeRange = el('font-size-range');
         const sizeInput = el('font-size-input');
-        const colorPicker = el('text-color-picker');
         const hexInput = el('hex-input');
         const fontNameLabel = el('font-name');
         const downloadBtn = el('download-btn');
@@ -1399,6 +1720,16 @@
             document.querySelectorAll('#weight-seg button').forEach(function (button) {
                 button.setAttribute('aria-pressed', String((button.dataset.bold === '1') === isBold));
             });
+            positionSegPill();
+        }
+
+        function positionSegPill() {
+            const seg = el('weight-seg');
+            const pill = seg.querySelector('.seg-pill');
+            const active = seg.querySelector('button[aria-pressed="true"]');
+            if (!pill || !active) return;
+            pill.style.width = active.offsetWidth + 'px';
+            pill.style.transform = 'translateX(' + active.offsetLeft + 'px)';
         }
 
         function redraw() {
@@ -1414,12 +1745,19 @@
             redraw();
         }
 
+        function syncLayoutUI() {
+            el('layout-value').textContent = t(currentLayout === 'cp1252' ? 'layoutNew' : 'layoutLegacy');
+            el('layout-menu').querySelectorAll('button[data-layout]').forEach(function (button) {
+                button.setAttribute('aria-selected', String(button.dataset.layout === currentLayout));
+            });
+        }
+
         function setLayout(layout) {
             if (!LAYOUTS[layout] || layout === currentLayout) return;
             currentLayout = layout;
             text = LAYOUTS[layout]();
             if (selectedIndex >= text.length) selectedIndex = text.length - 1;
-            el('layout-select').value = layout;
+            syncLayoutUI();
             syncTransformInputs(false);
             saveSettings();
             redraw();
@@ -1447,15 +1785,25 @@
 
         // ---------- 字色 ----------
 
+        let redrawFrame = 0;
+        function scheduleRedraw() {
+            if (redrawFrame) return;
+            redrawFrame = requestAnimationFrame(function () {
+                redrawFrame = 0;
+                redraw();
+            });
+        }
+
         function setColor(hex, options) {
             const normalized = normalizeHex(hex);
             if (!normalized) return;
             currentColor = normalized;
-            colorPicker.value = normalized;
             if (options && options.rewriteHex) hexInput.value = normalized;
+            syncColorUI(options && options.from);
             applyTheme(normalized);
             saveSettings();
-            redraw();
+            if (options && options.defer) scheduleRedraw();
+            else redraw();
         }
 
         // ---------- 字体 ----------
@@ -1494,6 +1842,220 @@
             } catch (error) {
                 fontNameLabel.textContent = '上次的字体无法恢复';
             }
+        }
+
+        // ---------- 取色器 ----------
+
+        const CP_PRESETS = [
+            '#ffffff', '#f2f2f2', '#8c8c8c', '#111111', '#ff3366', '#ff7a1a', '#ffd400', '#33d17a',
+            '#00bbff', '#4d6bff', '#6c5ce7', '#e84393', '#00d1b2', '#c0392b', '#7f8c8d', '#2c3e50'
+        ];
+        const cpState = { h: 0, s: 0, v: 100 };
+
+        function rgbToHex(rgb) {
+            const to = function (value) { return clamp(Math.round(value), 0, 255).toString(16).padStart(2, '0'); };
+            return '#' + to(rgb.r) + to(rgb.g) + to(rgb.b);
+        }
+
+        function rgbToHsv(rgb) {
+            const r = rgb.r / 255;
+            const g = rgb.g / 255;
+            const b = rgb.b / 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const d = max - min;
+            let h = 0;
+            if (d !== 0) {
+                if (max === r) h = ((g - b) / d) % 6;
+                else if (max === g) h = (b - r) / d + 2;
+                else h = (r - g) / d + 4;
+                h *= 60;
+                if (h < 0) h += 360;
+            }
+            return { h: h, s: max === 0 ? 0 : (d / max) * 100, v: max * 100 };
+        }
+
+        function hsvToRgb(h, s, v) {
+            const sat = s / 100;
+            const val = v / 100;
+            const c = val * sat;
+            const hp = ((h % 360) + 360) % 360 / 60;
+            const x = c * (1 - Math.abs((hp % 2) - 1));
+            let rgb;
+            if (hp < 1) rgb = [c, x, 0];
+            else if (hp < 2) rgb = [x, c, 0];
+            else if (hp < 3) rgb = [0, c, x];
+            else if (hp < 4) rgb = [0, x, c];
+            else if (hp < 5) rgb = [x, 0, c];
+            else rgb = [c, 0, x];
+            const m = val - c;
+            return { r: (rgb[0] + m) * 255, g: (rgb[1] + m) * 255, b: (rgb[2] + m) * 255 };
+        }
+
+        function rgbToCmyk(rgb) {
+            const r = rgb.r / 255;
+            const g = rgb.g / 255;
+            const b = rgb.b / 255;
+            const k = 1 - Math.max(r, g, b);
+            if (k >= 1) return { c: 0, m: 0, y: 0, k: 100 };
+            return {
+                c: ((1 - r - k) / (1 - k)) * 100,
+                m: ((1 - g - k) / (1 - k)) * 100,
+                y: ((1 - b - k) / (1 - k)) * 100,
+                k: k * 100
+            };
+        }
+
+        function cmykToRgb(c, m, y, k) {
+            const kk = k / 100;
+            return {
+                r: 255 * (1 - c / 100) * (1 - kk),
+                g: 255 * (1 - m / 100) * (1 - kk),
+                b: 255 * (1 - y / 100) * (1 - kk)
+            };
+        }
+
+        // 灰色或纯黑时色相会丢失，所以用 cpState 单独记住滑杆的 H
+        function syncColorUI(from) {
+            const rgb = hexToRgb(currentColor);
+            const hsv = rgbToHsv(rgb);
+            const cmyk = rgbToCmyk(rgb);
+            const keepHue = from === 'cp-area' || from === 'cp-hue' || from === 'cp-h' || from === 'cp-sv';
+            if (!keepHue && hsv.s > 0 && hsv.v > 0) cpState.h = hsv.h;
+            cpState.s = hsv.s;
+            cpState.v = hsv.v;
+
+            el('swatch-fill').style.background = currentColor;
+            el('cp-area').style.background = 'hsl(' + cpState.h + ', 100%, 50%)';
+            el('cp-hue').value = Math.round(cpState.h);
+            const dot = el('cp-dot');
+            dot.style.left = cpState.s + '%';
+            dot.style.top = (100 - cpState.v) + '%';
+
+            const fill = function (id, value) {
+                if (from === id) return;
+                el(id).value = Math.round(value);
+            };
+            fill('cp-r', rgb.r);
+            fill('cp-g', rgb.g);
+            fill('cp-b', rgb.b);
+            fill('cp-h', cpState.h);
+            fill('cp-s', cpState.s);
+            fill('cp-v', cpState.v);
+            fill('cp-c', cmyk.c);
+            fill('cp-m', cmyk.m);
+            fill('cp-y', cmyk.y);
+            fill('cp-k', cmyk.k);
+
+            el('cp-swatches').querySelectorAll('button').forEach(function (button) {
+                button.setAttribute('aria-pressed', String(button.dataset.color === currentColor));
+            });
+        }
+
+        function readField(id, fallback, min, max) {
+            const raw = el(id).value;
+            if (raw === '') return fallback;
+            const value = parseFloat(raw);
+            return isFinite(value) ? clamp(value, min, max) : fallback;
+        }
+
+        function bindColorPanel() {
+            CP_PRESETS.forEach(function (hex) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.dataset.color = hex;
+                button.style.background = hex;
+                button.setAttribute('aria-label', hex);
+                button.addEventListener('click', function () {
+                    setColor(hex, { rewriteHex: true });
+                });
+                el('cp-swatches').appendChild(button);
+            });
+
+            const area = el('cp-area');
+            const pickFromArea = function (event) {
+                const rect = area.getBoundingClientRect();
+                cpState.s = clamp((event.clientX - rect.left) / rect.width, 0, 1) * 100;
+                cpState.v = (1 - clamp((event.clientY - rect.top) / rect.height, 0, 1)) * 100;
+                setColor(rgbToHex(hsvToRgb(cpState.h, cpState.s, cpState.v)), { rewriteHex: true, from: 'cp-area', defer: true });
+            };
+            area.addEventListener('pointerdown', function (event) {
+                area.setPointerCapture(event.pointerId);
+                pickFromArea(event);
+            });
+            area.addEventListener('pointermove', function (event) {
+                if (area.hasPointerCapture(event.pointerId)) pickFromArea(event);
+            });
+
+            el('cp-hue').addEventListener('input', function () {
+                const h = Number(el('cp-hue').value);
+                cpState.h = h;
+                setColor(rgbToHex(hsvToRgb(h, cpState.s, cpState.v)), { rewriteHex: true, from: 'cp-hue', defer: true });
+            });
+
+            ['cp-r', 'cp-g', 'cp-b'].forEach(function (id) {
+                el(id).addEventListener('input', function () {
+                    const cur = hexToRgb(currentColor);
+                    const rgb = {
+                        r: readField('cp-r', cur.r, 0, 255),
+                        g: readField('cp-g', cur.g, 0, 255),
+                        b: readField('cp-b', cur.b, 0, 255)
+                    };
+                    setColor(rgbToHex(rgb), { rewriteHex: true, from: 'rgb', defer: true });
+                });
+            });
+
+            ['cp-h', 'cp-s', 'cp-v'].forEach(function (id) {
+                el(id).addEventListener('input', function () {
+                    const h = readField('cp-h', cpState.h, 0, 360);
+                    const s = readField('cp-s', cpState.s, 0, 100);
+                    const v = readField('cp-v', cpState.v, 0, 100);
+                    cpState.h = h;
+                    setColor(rgbToHex(hsvToRgb(h, s, v)), { rewriteHex: true, from: id, defer: true });
+                });
+            });
+
+            ['cp-c', 'cp-m', 'cp-y', 'cp-k'].forEach(function (id) {
+                el(id).addEventListener('input', function () {
+                    const cur = rgbToCmyk(hexToRgb(currentColor));
+                    const c = readField('cp-c', cur.c, 0, 100);
+                    const m = readField('cp-m', cur.m, 0, 100);
+                    const y = readField('cp-y', cur.y, 0, 100);
+                    const k = readField('cp-k', cur.k, 0, 100);
+                    setColor(rgbToHex(cmykToRgb(c, m, y, k)), { rewriteHex: true, from: 'cmyk', defer: true });
+                });
+            });
+        }
+
+        function setColorPanel(open) {
+            el('cp-panel').classList.toggle('open', open);
+            el('color-trigger').setAttribute('aria-expanded', String(open));
+        }
+
+        // ---------- 下拉/弹窗 ----------
+
+        function setLangMenu(open) {
+            el('lang-menu').classList.toggle('open', open);
+            el('lang-menu').setAttribute('aria-hidden', String(!open));
+            el('lang-btn').setAttribute('aria-expanded', String(open));
+        }
+
+        function setLayoutMenu(open) {
+            el('layout-dropdown').classList.toggle('open', open);
+            el('layout-trigger').setAttribute('aria-expanded', String(open));
+        }
+
+        function openDialog(dialog) {
+            dialog.classList.remove('is-open');
+            dialog.showModal();
+            requestAnimationFrame(function () { dialog.classList.add('is-open'); });
+        }
+
+        function closeDialog(dialog) {
+            dialog.classList.remove('is-open');
+            setTimeout(function () {
+                if (dialog.open) dialog.close();
+            }, 180);
         }
 
         // ---------- 事件绑定 ----------
@@ -1539,10 +2101,6 @@
             else sizeInput.value = currentFontSize;
         });
 
-        colorPicker.addEventListener('input', function () {
-            setColor(colorPicker.value, { rewriteHex: true });
-        });
-
         hexInput.addEventListener('input', function () {
             const normalized = normalizeHex(hexInput.value);
             if (normalized) setColor(normalized);
@@ -1571,11 +2129,11 @@
         el('clear-font-btn').addEventListener('click', clearFont);
 
         el('manual-btn').addEventListener('click', function () {
-            el('manual-dialog').showModal();
+            openDialog(el('manual-dialog'));
         });
 
         el('manual-close').addEventListener('click', function () {
-            el('manual-dialog').close();
+            closeDialog(el('manual-dialog'));
         });
 
         el('prev-char').addEventListener('click', function () { selectIndex(selectedIndex - 1); });
@@ -1602,29 +2160,43 @@
             redraw();
         });
 
-        el('layout-select').addEventListener('change', function (event) {
-            setLayout(event.target.value);
+        el('layout-trigger').addEventListener('click', function (event) {
+            event.stopPropagation();
+            setLayoutMenu(!el('layout-dropdown').classList.contains('open'));
+        });
+
+        el('layout-menu').addEventListener('click', function (event) {
+            const button = event.target.closest('button[data-layout]');
+            if (!button) return;
+            setLayoutMenu(false);
+            setLayout(button.dataset.layout);
+        });
+
+        el('color-trigger').addEventListener('click', function (event) {
+            event.stopPropagation();
+            setColorPanel(!el('cp-panel').classList.contains('open'));
+        });
+
+        el('cp-panel').addEventListener('click', function (event) {
+            event.stopPropagation();
         });
 
         el('lang-btn').addEventListener('click', function (event) {
             event.stopPropagation();
-            const menu = el('lang-menu');
-            menu.hidden = !menu.hidden;
-            el('lang-btn').setAttribute('aria-expanded', String(!menu.hidden));
+            setLangMenu(!el('lang-menu').classList.contains('open'));
         });
 
         el('lang-menu').addEventListener('click', function (event) {
             const button = event.target.closest('button[data-lang]');
             if (!button) return;
-            el('lang-menu').hidden = true;
-            el('lang-btn').setAttribute('aria-expanded', 'false');
+            setLangMenu(false);
             applyLanguage(button.dataset.lang);
         });
 
         document.addEventListener('click', function () {
-            if (el('lang-menu').hidden) return;
-            el('lang-menu').hidden = true;
-            el('lang-btn').setAttribute('aria-expanded', 'false');
+            setLangMenu(false);
+            setLayoutMenu(false);
+            setColorPanel(false);
         });
 
         el('weight-seg').addEventListener('click', function (event) {
@@ -1651,19 +2223,19 @@
         downloadBtn.addEventListener('click', function () {
             // 不载入字体也能导出，此时用系统字体渲染
             el('export-system-note').hidden = fontLoaded;
-            exportDialog.showModal();
+            openDialog(exportDialog);
         });
 
         // 该 WebView 里 dialog 的 close 事件不会触发，所以在选项上手直接导出
         exportDialog.querySelectorAll('button[data-choice]').forEach(function (button) {
             button.addEventListener('click', function () {
-                exportDialog.close();
+                closeDialog(exportDialog);
                 runExport(button.dataset.choice, el('export-both-weights').checked);
             });
         });
 
         el('export-cancel').addEventListener('click', function () {
-            exportDialog.close();
+            closeDialog(exportDialog);
         });
 
         // ---------- 启动 ----------
@@ -1701,10 +2273,11 @@
                 if (saved.fontName) fontName = saved.fontName;
             }
 
-            colorPicker.value = currentColor;
+            bindColorPanel();
+            syncColorUI();
             hexInput.value = currentColor;
             el('clip-toggle').checked = clipToCell;
-            el('layout-select').value = currentLayout;
+            syncLayoutUI();
             syncWeightUI();
             updateSizeUI(true);
             syncTransformInputs(false);
