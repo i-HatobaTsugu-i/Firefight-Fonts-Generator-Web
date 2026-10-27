@@ -610,7 +610,10 @@
         .manual-mock .cp-panel { display: none !important; }
         .manual-mock .seg-pill { display: none; }
         .manual-mock .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
-        .manual-mock canvas { display: block; max-width: 96px; border-radius: 6px; }
+        .manual-mock canvas { display: block; max-width: 100%; border-radius: 10px; }
+        .manual-preview { margin: 8px 0 10px; }
+        .manual-preview .manual-mock { margin: 0; }
+        .manual-preview-note { margin: 6px 0 0; font-size: 10.5px; color: var(--muted); opacity: .85; }
 
         @media (max-width: 420px) {
             .wrap { padding: 20px 12px 40px; }
@@ -868,6 +871,7 @@
                 disclaimer: '非官方第三方工具，与游戏开发商、发行商无关；修改游戏文件的风险由使用者自行承担。',
                 manualTitle: '用户手册',
                 manualIntro: '每个控件的作用，按界面从上到下排列。',
+                manualMockNote: '主界面控件示意',
                 manualTipsTitle: '建议',
                 manualItems: [
                     { term: '载入字体', desc: '选择一个 .ttf / .otf 文件，用它渲染整张图集；也可以不载入，直接导出会用设备系统字体。' },
@@ -938,6 +942,7 @@
                 disclaimer: 'Unofficial third-party tool, not affiliated with the game developer or publisher. Modifying game files is at your own risk.',
                 manualTitle: 'User manual',
                 manualIntro: 'What each control does, top to bottom.',
+                manualMockNote: 'Preview of the control on the main screen',
                 manualTipsTitle: 'Notes',
                 manualItems: [
                     { term: 'Load font', desc: 'Pick a .ttf / .otf file to render the atlas. You can also skip it — exporting without a font uses the device system font.' },
@@ -1008,6 +1013,7 @@
                 disclaimer: 'Неофициальный сторонний инструмент, не связан с разработчиком или издателем игры. Изменение файлов игры — на ваш риск.',
                 manualTitle: 'Руководство',
                 manualIntro: 'Что делает каждый элемент интерфейса — сверху вниз.',
+                manualMockNote: 'Вид элемента на главном экране',
                 manualTipsTitle: 'Рекомендации',
                 manualItems: [
                     { term: 'Загрузить шрифт', desc: 'Выберите файл .ttf / .otf для отрисовки атласа. Можно не загружать — тогда экспорт пойдёт системным шрифтом.' },
@@ -1112,13 +1118,14 @@
             if (!source) return null;
 
             if (key === 'preview') {
+                // 手册里固定展示字符 A，方便对照
                 const wrap = document.createElement('div');
                 wrap.className = 'manual-mock';
-                const clone = source.cloneNode(true);
-                clone.removeAttribute('id');
-                wrap.appendChild(clone);
-                const ctx = clone.getContext('2d');
-                if (ctx) ctx.drawImage(source, 0, 0);
+                const canvas = document.createElement('canvas');
+                canvas.width = previewCanvas.width;
+                canvas.height = previewCanvas.height;
+                drawPreview(canvas, 'A');
+                wrap.appendChild(canvas);
                 wrap.inert = true;
                 return wrap;
             }
@@ -1142,12 +1149,23 @@
                 const wrap = document.createElement('div');
                 const term = document.createElement('dt');
                 term.textContent = item.term;
+                wrap.appendChild(term);
+
+                const mock = createManualMock(MANUAL_MOCKS[index]);
+                if (mock) {
+                    const box = document.createElement('div');
+                    box.className = 'manual-preview';
+                    box.appendChild(mock);
+                    const note = document.createElement('p');
+                    note.className = 'manual-preview-note';
+                    note.textContent = t('manualMockNote');
+                    box.appendChild(note);
+                    wrap.appendChild(box);
+                }
+
                 const desc = document.createElement('dd');
                 desc.textContent = item.desc;
-                wrap.appendChild(term);
                 wrap.appendChild(desc);
-                const mock = createManualMock(MANUAL_MOCKS[index]);
-                if (mock) wrap.appendChild(mock);
                 list.appendChild(wrap);
             });
             (t('manualTips') || []).forEach(function (text) {
@@ -1463,11 +1481,17 @@
                 drawGlyph(ctx, char, origin.x + cellW / 2, origin.y + cellH / 2, currentFontSize * s, currentColor, scaled, clipRect, bold);
             }
             if (withSelection && selectedIndex >= 0 && selectedIndex < text.length) {
+                // 与字符预览框一致的圆角描边 + 选中时的一次脉冲
                 const origin = cellOrigin(selectedIndex, s);
+                const p = selectionProgress;
+                const inset = 2 * s;
                 ctx.save();
-                ctx.strokeStyle = toRgba(theme.inkHex, 0.75);
-                ctx.lineWidth = s;
-                ctx.strokeRect(origin.x + s / 2, origin.y + s / 2, cellW - s, cellH - s);
+                ctx.fillStyle = toRgba(theme.inkHex, 0.04 + 0.14 * (1 - p));
+                roundRect(ctx, origin.x + inset, origin.y + inset, cellW - inset * 2, cellH - inset * 2, 5 * s);
+                ctx.fill();
+                ctx.strokeStyle = toRgba(theme.inkHex, 0.3 + 0.65 * p);
+                ctx.lineWidth = (2.4 - 1.4 * p) * s;
+                ctx.stroke();
                 ctx.restore();
             }
         }
@@ -1613,21 +1637,29 @@
             saveBlob(buildZip(entries), 'font_image.zip');
         }
 
-        function renderPreview() {
-            const ctx = previewCanvas.getContext('2d');
+        function roundRect(ctx, x, y, w, h, r) {
+            const radius = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.arcTo(x + w, y, x + w, y + h, radius);
+            ctx.arcTo(x + w, y + h, x, y + h, radius);
+            ctx.arcTo(x, y + h, x, y, radius);
+            ctx.arcTo(x, y, x + w, y, radius);
+            ctx.closePath();
+        }
+
+        // 把指定字符画进指定画布：图集预览和手册里的示意共用
+        function drawPreview(canvas, char) {
+            const ctx = canvas.getContext('2d');
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!char) return;
 
-            const char = selectedChar();
-            if (char === null) {
-                updateInfo();
-                return;
-            }
             const transform = transformOf(char);
-
             ctx.setTransform(PREVIEW_SCALE, 0, 0, PREVIEW_SCALE, PREVIEW_PAD, PREVIEW_PAD);
             ctx.fillStyle = toRgba(theme.inkHex, 0.05);
-            ctx.fillRect(0, 0, CHAR_WIDTH, CHAR_HEIGHT);
+            roundRect(ctx, 0, 0, CHAR_WIDTH, CHAR_HEIGHT, 1.6);
+            ctx.fill();
 
             if (!isBlankChar(char)) {
                 // 未变形字形作为参照
@@ -1651,10 +1683,15 @@
                 drawGlyph(ctx, char, CHAR_WIDTH / 2, CHAR_HEIGHT / 2, currentFontSize, currentColor, transform, cellRect);
             }
 
-            ctx.lineWidth = 1 / PREVIEW_SCALE;
+            const line = 1 / PREVIEW_SCALE;
+            ctx.lineWidth = line;
             ctx.strokeStyle = toRgba(theme.inkHex, 0.35);
-            ctx.strokeRect(0, 0, CHAR_WIDTH, CHAR_HEIGHT);
+            roundRect(ctx, line / 2, line / 2, CHAR_WIDTH - line, CHAR_HEIGHT - line, 1.6);
+            ctx.stroke();
+        }
 
+        function renderPreview() {
+            drawPreview(previewCanvas, selectedChar());
             updateInfo();
         }
 
@@ -1740,6 +1777,30 @@
             pill.style.transform = 'translateX(' + active.offsetLeft + 'px)';
         }
 
+        let selectionProgress = 1;
+        let selectionRaf = 0;
+
+        function pulseSelection() {
+            if (selectionRaf) cancelAnimationFrame(selectionRaf);
+            selectionProgress = 0;
+            renderAtlas(true);
+            const start = performance.now();
+            const step = function (now) {
+                const p = Math.max(0, Math.min(1, (now - start) / 260));
+                selectionProgress = 1 - Math.pow(1 - p, 3);
+                renderAtlas(true);
+                selectionRaf = p < 1 ? requestAnimationFrame(step) : 0;
+            };
+            selectionRaf = requestAnimationFrame(step);
+            // 后台标签页里 rAF 可能不跑，定个闹钟确保最后停在完成态
+            setTimeout(function () {
+                if (selectionProgress < 1) {
+                    selectionProgress = 1;
+                    renderAtlas(true);
+                }
+            }, 320);
+        }
+
         function redraw() {
             renderAtlas(true);
             renderPreview();
@@ -1751,6 +1812,7 @@
             syncTransformInputs(false);
             saveSettings();
             redraw();
+            pulseSelection();
         }
 
         function syncLayoutUI() {
