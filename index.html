@@ -183,6 +183,17 @@
         .row.between > .row.tight { min-width: 0; }
         #font-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         #download-btn { flex: 0 0 auto; }
+        .chip-btn {
+            flex: 0 0 auto;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            line-height: 1.6;
+            color: var(--muted);
+            background: transparent;
+        }
+        .chip-btn:disabled { opacity: .3; }
+        .chip-btn:not(:disabled):hover { color: var(--ink); }
         .dialog-check { align-items: flex-start; text-align: left; }
 
         .control { display: grid; gap: 12px; align-items: center; }
@@ -232,6 +243,7 @@
         dialog::backdrop { background: rgba(0, 0, 0, .45); }
         dialog h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
         dialog .hint { margin: 0 0 14px; }
+        #export-system-note { margin: -6px 0 12px; color: var(--ink); opacity: .85; }
         .choice {
             display: flex;
             flex-direction: column;
@@ -334,8 +346,9 @@
                 <div class="row tight">
                     <label class="btn file"><span data-i18n="loadFont">载入字体</span><input type="file" id="font-input" accept=".ttf"></label>
                     <span id="font-name" class="muted small">未载入</span>
+                    <button id="clear-font-btn" class="chip-btn" type="button" data-i18n="clearFont" disabled>清除字体</button>
                 </div>
-                <button id="download-btn" class="primary" type="button" disabled data-i18n="download">下载 PNG</button>
+                <button id="download-btn" class="primary" type="button" data-i18n="download">下载 PNG</button>
             </div>
 
             <div class="control size">
@@ -426,6 +439,7 @@
     <dialog id="export-dialog">
         <h3 data-i18n="exportTitle">导出分辨率</h3>
         <p class="hint" data-i18n="exportHint">导出正方形、透明背景的 PNG。</p>
+        <p class="hint" id="export-system-note" data-i18n="exportSystemNote" hidden>未载入字体，将用系统字体导出。</p>
         <label class="check dialog-check"><input type="checkbox" id="export-both-weights"> <span data-i18n="exportBothWeights">同时导出常规 + 加粗</span></label>
         <button type="button" class="choice" data-choice="512">
             <strong>512 × 512</strong><span data-i18n="resOriginal">图集原始尺寸</span>
@@ -478,6 +492,7 @@
                 title: 'Firefight 字体图片生成器',
                 subtitle: '载入 .ttf / .otf 字体，导出 Firefight 可读取的字体图集 PNG，用于替换游戏内字体。',
                 loadFont: '载入字体',
+                clearFont: '清除字体',
                 notLoaded: '未载入',
                 loaded: '已载入',
                 download: '下载 PNG',
@@ -504,6 +519,7 @@
                 resetAll: '重置全部',
                 exportTitle: '导出分辨率',
                 exportHint: '导出正方形、透明背景的 PNG。',
+                exportSystemNote: '未载入字体，将用系统字体导出。',
                 exportBothWeights: '同时导出常规 + 加粗',
                 resOriginal: '图集原始尺寸',
                 resHd: '2 倍高清',
@@ -523,6 +539,7 @@
                 title: 'Firefight Font Generator',
                 subtitle: 'Load a .ttf / .otf font and export a Firefight-readable atlas PNG to replace the in-game typeface.',
                 loadFont: 'Load font',
+                clearFont: 'Clear font',
                 notLoaded: 'not loaded',
                 loaded: 'loaded',
                 download: 'Download PNG',
@@ -549,6 +566,7 @@
                 resetAll: 'Reset all',
                 exportTitle: 'Export size',
                 exportHint: 'Exports a square PNG with a transparent background.',
+                exportSystemNote: 'No font loaded — the export will use the system font.',
                 exportBothWeights: 'Also export regular + bold',
                 resOriginal: 'Original atlas size',
                 resHd: '2× high-res',
@@ -568,6 +586,7 @@
                 title: 'Генератор шрифтов Firefight',
                 subtitle: 'Загрузите шрифт .ttf / .otf и экспортируйте PNG-атлас, который читает Firefight, для замены шрифта в игре.',
                 loadFont: 'Загрузить шрифт',
+                clearFont: 'Убрать шрифт',
                 notLoaded: 'не загружен',
                 loaded: 'загружен',
                 download: 'Скачать PNG',
@@ -594,6 +613,7 @@
                 resetAll: 'Сбросить всё',
                 exportTitle: 'Размер экспорта',
                 exportHint: 'Экспорт квадратного PNG с прозрачным фоном.',
+                exportSystemNote: 'Шрифт не загружен — экспорт пойдёт системным шрифтом.',
                 exportBothWeights: 'Экспортировать обычный + жирный',
                 resOriginal: 'Исходный размер атласа',
                 resHd: '2× HD',
@@ -878,6 +898,17 @@
                 const request = tx.objectStore(DB_STORE).get(key);
                 request.onsuccess = function () { resolve(request.result || null); };
                 request.onerror = function () { resolve(null); };
+            });
+        }
+
+        async function idbDelete(key) {
+            const db = await openDb();
+            if (!db) return;
+            await new Promise(function (resolve) {
+                const tx = db.transaction(DB_STORE, 'readwrite');
+                tx.objectStore(DB_STORE).delete(key);
+                tx.oncomplete = resolve;
+                tx.onerror = resolve;
             });
         }
 
@@ -1207,7 +1238,7 @@
 
         function updateFontLabel() {
             fontNameLabel.textContent = fontLoaded ? (fontName || t('loaded')) : t('notLoaded');
-            downloadBtn.disabled = !fontLoaded;
+            el('clear-font-btn').disabled = !fontLoaded;
         }
 
         function syncWeightUI() {
@@ -1284,6 +1315,20 @@
             fontLoaded = true;
             fontName = name || '';
             updateFontLabel();
+            redraw();
+        }
+
+        // 清除已载入的字体：卸载 FontFace、删掉 IndexedDB 里的副本，回落到系统字体
+        function clearFont() {
+            if (currentFontFace) {
+                document.fonts.delete(currentFontFace);
+                currentFontFace = null;
+            }
+            fontLoaded = false;
+            fontName = '';
+            updateFontLabel();
+            idbDelete(DB_FONT_KEY);
+            saveSettings();
             redraw();
         }
 
@@ -1369,6 +1414,8 @@
             }
         });
 
+        el('clear-font-btn').addEventListener('click', clearFont);
+
         el('prev-char').addEventListener('click', function () { selectIndex(selectedIndex - 1); });
         el('next-char').addEventListener('click', function () { selectIndex(selectedIndex + 1); });
 
@@ -1440,7 +1487,8 @@
         });
 
         downloadBtn.addEventListener('click', function () {
-            if (!fontLoaded) return;
+            // 不载入字体也能导出，此时用系统字体渲染
+            el('export-system-note').hidden = fontLoaded;
             exportDialog.showModal();
         });
 
