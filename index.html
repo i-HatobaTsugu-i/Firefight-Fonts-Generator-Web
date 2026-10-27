@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firefight Font Image Generator</title>
+    <style>
+        :root {
+            --bg: #101216;
+            --surface: #171a20;
+            --line: #272b33;
+            --ink: #e9ebee;
+            --muted: #9aa1ab;
+            --accent: #ffffff;
+            --accent-ink: #101216;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { -webkit-tap-highlight-color: transparent; }
+        :focus { outline: none; }
+        :focus-visible { outline: none; }
+        button, label, .btn, .seg, dialog, input[type="range"], canvas {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        html, body { margin: 0; }
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--ink);
+            font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color .2s ease, color .2s ease;
+        }
+        .wrap {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 28px 16px 56px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: .2px;
+        }
+        header p {
+            margin: 6px 0 0;
+            font-size: 12.5px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card h2 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .3px;
+            color: var(--muted);
+        }
+        .row { display: flex; align-items: center; gap: 10px; }
+        .row.tight { gap: 8px; }
+        .between { justify-content: space-between; }
+        .muted { color: var(--muted); }
+        .small { font-size: 12px; }
+        .hint { margin: -4px 0 0; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+        label { font-size: 12.5px; color: var(--muted); }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            min-width: 0;
+            padding: 7px 9px;
+            font: inherit;
+            font-variant-numeric: tabular-nums;
+            color: var(--ink);
+            background: transparent;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            text-align: center;
+        }
+        input[type="text"] {
+            text-align: left;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: .3px;
+        }
+        input[type="text"].num {
+            text-align: center;
+            font-family: inherit;
+            letter-spacing: 0;
+            font-variant-numeric: tabular-nums;
+        }
+        input[type="number"]:focus, input[type="text"]:focus { outline: none; border-color: var(--accent); }
+        input[type="range"] { width: 100%; margin: 0; accent-color: var(--accent); }
+        input[type="color"] {
+            width: 44px;
+            height: 36px;
+            padding: 3px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
+
+        select {
+            font: inherit;
+            font-size: 13px;
+            padding: 7px 10px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: transparent;
+            color: var(--ink);
+            justify-self: start;
+            max-width: 100%;
+        }
+        select:focus { outline: none; border-color: var(--accent); }
+
+        .seg {
+            display: inline-flex;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            overflow: hidden;
+            justify-self: start;
+        }
+        .seg button {
+            border: 0;
+            border-radius: 0;
+            padding: 7px 16px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .seg button + button { border-left: 1px solid var(--line); }
+        .seg button[aria-pressed="true"] {
+            background: var(--accent);
+            color: var(--accent-ink);
+            font-weight: 600;
+        }
+
+        button, .btn {
+            font: inherit;
+            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 9px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color .15s ease, opacity .15s ease;
+        }
+        button:hover:not(:disabled), .btn:hover { border-color: var(--accent); }
+        button:disabled { opacity: .35; cursor: default; }
+        button.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--accent-ink);
+            font-weight: 600;
+        }
+        button.icon {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            font-size: 16px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .file { position: relative; display: inline-flex; align-items: center; overflow: hidden; flex: 0 0 auto; }
+        .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .row.between { flex-wrap: wrap; }
+        .row.between > .row.tight { min-width: 0; }
+        #font-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #download-btn { flex: 0 0 auto; }
+        .dialog-check { align-items: flex-start; text-align: left; }
+
+        .control { display: grid; gap: 12px; align-items: center; }
+        /* 标签列按当前语言里最长的标签统一对齐，俄文/英文不会压到控件上 */
+        .control.size { grid-template-columns: var(--label-w, 4.4em) 1fr 5.2em; }
+        .control.weight { grid-template-columns: var(--label-w, 4.4em) 1fr; }
+        .control.color { grid-template-columns: var(--label-w, 4.4em) 44px 1fr; }
+        .control.tf { grid-template-columns: var(--label-w, 4.4em) 5.2em 1fr; }
+        .control > label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        #canvas {
+            width: 100%;
+            max-width: 512px;
+            margin: 0 auto;
+            display: block;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #preview {
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+            display: block;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+        }
+        .info {
+            margin: 0;
+            min-height: 2.8em;
+            font-size: 11.5px;
+            line-height: 1.4;
+            color: var(--muted);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            word-break: break-word;
+        }
+        .check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink); }
+
+        dialog {
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink);
+            border-radius: 16px;
+            padding: 18px;
+            width: min(320px, calc(100vw - 48px));
+        }
+        dialog::backdrop { background: rgba(0, 0, 0, .45); }
+        dialog h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
+        dialog .hint { margin: 0 0 14px; }
+        .choice {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .choice strong { font-weight: 600; font-size: 13.5px; }
+        .choice span { font-size: 11.5px; color: var(--muted); }
+        .cancel { width: 100%; margin-top: 2px; }
+        .dialog-check { margin-bottom: 12px; }
+
+        header { padding-right: 46px; }
+
+        .lang { position: fixed; top: 14px; right: 14px; z-index: 20; }
+        .lang-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface);
+        }
+        .lang-btn svg { width: 21px; height: 21px; display: block; fill: currentColor; }
+        .lang-menu {
+            position: absolute;
+            top: 44px;
+            right: 0;
+            min-width: 132px;
+            padding: 6px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+        }
+        .lang-menu[hidden] { display: none; }
+        .lang-menu button {
+            width: 100%;
+            border: 0;
+            padding: 8px 12px;
+            text-align: left;
+            border-radius: 8px;
+        }
+        .lang-menu button[aria-current="true"] {
+            background: var(--accent);
+            color: var(--accent-ink);
+        }
+
+        .site-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+            font-size: 11.5px;
+            color: var(--muted);
+            text-align: center;
+        }
+        .footer-brand { display: flex; align-items: center; gap: 6px; }
+        .site-footer svg { width: 15px; height: 15px; display: block; opacity: .85; }
+        .footer-note { margin: 0; max-width: 32em; font-size: 11px; line-height: 1.55; opacity: .78; }
+
+        @media (max-width: 420px) {
+            .wrap { padding: 20px 12px 40px; }
+            .control { gap: 8px; }
+            .control.size { grid-template-columns: var(--label-w, 3.6em) 1fr 4.6em; }
+            .control.color { grid-template-columns: var(--label-w, 3.6em) 40px 1fr; }
+            .control.tf { grid-template-columns: var(--label-w, 3.6em) 4.6em 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="lang">
+        <button id="lang-btn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Language">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+        </button>
+        <div class="lang-menu" id="lang-menu" hidden>
+            <button type="button" data-lang="zh">中文</button>
+            <button type="button" data-lang="en">English</button>
+            <button type="button" data-lang="ru">Русский</button>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <header>
+            <h1 data-i18n="title">Firefight 字体图片生成器</h1>
+            <p data-i18n="subtitle">载入 .ttf / .otf 字体，导出 Firefight 可读取的字体图集 PNG，用于替换游戏内字体。</p>
+        </header>
+
+        <section class="card">
+            <div class="row between">
+                <div class="row tight">
+                    <label class="btn file"><span data-i18n="loadFont">载入字体</span><input type="file" id="font-input" accept=".ttf"></label>
+                    <span id="font-name" class="muted small">未载入</span>
+                </div>
+                <button id="download-btn" class="primary" type="button" disabled data-i18n="download">下载 PNG</button>
+            </div>
+
+            <div class="control size">
+                <label for="font-size-range" data-i18n="sizeLabel">字号</label>
+                <input type="range" id="font-size-range" min="10" max="100" step="1" value="32">
+                <input type="text" id="font-size-input" class="num" inputmode="decimal" value="32" spellcheck="false" autocomplete="off">
+            </div>
+            <p class="hint" data-i18n="sizeHint">可填 px（如 48），也可填放大倍率（如 1.5、1.5x；1× = 32px）。</p>
+
+            <div class="control weight">
+                <label data-i18n="weight">字重</label>
+                <div class="seg" id="weight-seg">
+                    <button type="button" data-bold="0" aria-pressed="true" data-i18n="regular">常规</button>
+                    <button type="button" data-bold="1" aria-pressed="false" data-i18n="bold">加粗</button>
+                </div>
+            </div>
+
+            <div class="control weight">
+                <label for="layout-select" data-i18n="layout">排版</label>
+                <select id="layout-select">
+                    <option value="cp1252" data-i18n="layoutNew">新版（0x20–0xFE）</option>
+                    <option value="legacy" data-i18n="layoutLegacy">旧版（Latin-1）</option>
+                </select>
+            </div>
+
+            <div class="control color">
+                <label for="text-color-picker" data-i18n="color">字色</label>
+                <input type="color" id="text-color-picker" value="#ffffff">
+                <input type="text" id="hex-input" value="#ffffff" spellcheck="false" autocomplete="off" autocapitalize="off">
+            </div>
+            <p class="hint" data-i18n="colorHint">页面背景随字色自动变深或变浅；导出图片始终是透明背景。</p>
+
+            <canvas id="canvas" width="512" height="512"></canvas>
+        </section>
+
+        <section class="card">
+            <div class="row between">
+                <h2 data-i18n="previewTitle">字符预览</h2>
+                <div class="row tight">
+                    <button class="icon" id="prev-char" type="button" aria-label="上一个" data-i18n-aria="prev">‹</button>
+                    <button class="icon" id="next-char" type="button" aria-label="下一个" data-i18n-aria="next">›</button>
+                </div>
+            </div>
+
+            <canvas id="preview" width="280" height="280"></canvas>
+            <p id="preview-info" class="info"></p>
+
+            <div class="control tf">
+                <label for="tf-w" data-i18n="tfW">拉宽</label>
+                <input type="number" id="tf-w" step="0.5" value="0" inputmode="decimal">
+                <input type="range" id="tf-w-range" min="-32" max="32" step="0.5" value="0">
+            </div>
+            <div class="control tf">
+                <label for="tf-h" data-i18n="tfH">拉高</label>
+                <input type="number" id="tf-h" step="0.5" value="0" inputmode="decimal">
+                <input type="range" id="tf-h-range" min="-32" max="32" step="0.5" value="0">
+            </div>
+            <div class="control tf">
+                <label for="tf-x" data-i18n="tfX">水平位移</label>
+                <input type="number" id="tf-x" step="0.5" value="0" inputmode="decimal">
+                <input type="range" id="tf-x-range" min="-16" max="16" step="0.5" value="0">
+            </div>
+            <div class="control tf">
+                <label for="tf-y" data-i18n="tfY">垂直位移</label>
+                <input type="number" id="tf-y" step="0.5" value="0" inputmode="decimal">
+                <input type="range" id="tf-y-range" min="-16" max="16" step="0.5" value="0">
+            </div>
+            <p class="hint" data-i18n="tfHint">单位 px：拉宽 / 拉高改变字形外框尺寸，位移正数向右、向下。</p>
+
+            <div class="row between">
+                <label class="check"><input type="checkbox" id="clip-toggle" checked> <span data-i18n="clip">裁剪到格内</span></label>
+                <div class="row tight">
+                    <button id="reset-char-btn" type="button" disabled data-i18n="resetChar">重置此字</button>
+                    <button id="reset-all-btn" type="button" disabled data-i18n="resetAll">重置全部</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="site-footer">
+            <div class="footer-brand">
+                <svg viewBox="0 0 26.9 23" aria-hidden="true"><path fill="currentColor" d="M26.5174 3.39471C26.235 3.2567 26.1137 3.52006 25.9487 3.65346C25.8923 3.69659 25.8446 3.75294 25.7969 3.80469C25.3846 4.24516 24.9027 4.53439 24.2737 4.49989C23.3536 4.44814 22.5682 4.73737 21.8735 5.44119C21.7258 4.57349 21.2353 4.0554 20.4889 3.72304C20.0985 3.55054 19.7034 3.37746 19.4297 3.00197C19.2388 2.73459 19.1865 2.43673 19.091 2.14289C19.0301 1.96579 18.9697 1.78466 18.7656 1.75418C18.5442 1.71968 18.4574 1.90541 18.3705 2.06067C18.0232 2.69549 17.8887 3.39471 17.9019 4.10313C17.9324 5.6965 18.6051 6.96556 19.9421 7.86834C20.0939 7.97184 20.133 8.07535 20.0852 8.22658C19.9938 8.53766 19.8857 8.83955 19.7903 9.15063C19.7293 9.34901 19.6384 9.39271 19.4257 9.30588C18.692 8.9994 18.0583 8.54571 17.4982 7.99772C16.5477 7.07827 15.6881 6.06336 14.6162 5.26869C14.3644 5.08296 14.1125 4.91045 13.8521 4.746C12.7584 3.68394 13.9952 2.81164 14.2816 2.70814C14.5812 2.60003 14.3857 2.22857 13.4179 2.23317C12.4502 2.2372 11.5646 2.56151 10.4359 2.99335C10.2708 3.05832 10.0972 3.10547 9.91951 3.14457C8.8954 2.95022 7.83162 2.90709 6.72069 3.03245C4.62877 3.26533 2.95777 4.25436 1.72954 5.94261C0.254043 7.97184 -0.0932678 10.2777 0.33167 12.6824C0.778458 15.2171 2.07225 17.3153 4.06008 18.9558C6.12152 20.6567 8.49577 21.4905 11.2047 21.3306C12.8498 21.2358 14.6812 21.0155 16.7473 19.2669C17.2682 19.5262 17.8151 19.6297 18.7219 19.7074C19.4205 19.7723 20.0933 19.6729 20.6143 19.5648C21.4302 19.3923 21.3739 18.6367 21.0789 18.4981C18.6874 17.3843 19.2124 17.8374 18.7351 17.4706C19.9501 16.033 21.8063 13.4776 22.379 9.99821C22.4353 9.61409 22.5072 9.073 22.4986 8.76192C22.494 8.57216 22.5377 8.49856 22.7545 8.47671C23.3536 8.40771 23.935 8.24383 24.4692 7.94999C26.0188 7.10357 26.6439 5.71318 26.7911 4.04678C26.8129 3.79204 26.7865 3.52869 26.5174 3.39471ZM13.0143 18.3946C10.6964 16.5724 9.5722 15.9726 9.10816 15.9985C8.67402 16.0244 8.75222 16.5212 8.84768 16.8449C8.94773 17.1646 9.07768 17.3849 9.25996 17.6655C9.38589 17.8512 9.47272 18.1272 9.13404 18.3348C8.38766 18.7965 7.08985 18.1796 7.0289 18.1491C5.51833 17.2595 4.25559 16.0853 3.36546 14.4793C2.50581 12.9337 2.0067 11.2753 1.92447 9.50542C1.90262 9.07818 2.02855 8.92695 2.45406 8.84932C3.01413 8.74582 3.59144 8.72397 4.15093 8.80619C6.51656 9.15178 8.53027 10.2092 10.2185 11.8848C11.1822 12.8388 11.9114 13.979 12.6623 15.0929C13.461 16.2757 14.3201 17.4027 15.4144 18.3268C15.8008 18.6505 16.109 18.8966 16.404 19.0783C15.5144 19.1778 14.0297 19.1991 13.0143 18.3958V18.3946ZM14.1252 11.2489C14.1252 11.0591 14.277 10.9079 14.4679 10.9079C14.511 10.9079 14.5501 10.9165 14.5852 10.9292C14.6329 10.9464 14.6766 10.9723 14.7111 11.0114C14.7721 11.0718 14.8066 11.158 14.8066 11.2489C14.8066 11.4386 14.6548 11.5899 14.4639 11.5899C14.273 11.5899 14.1252 11.4386 14.1252 11.2489ZM17.5759 13.0188C17.3545 13.1096 17.1331 13.1873 16.9203 13.1959C16.5903 13.2131 16.2303 13.0791 16.0348 12.9153C15.7312 12.6605 15.5139 12.5179 15.423 12.0734C15.3839 11.8837 15.4057 11.5899 15.4402 11.4214C15.5185 11.0585 15.4316 10.8257 15.1757 10.614C14.9676 10.4415 14.7025 10.3938 14.4115 10.3938C14.3029 10.3938 14.2034 10.3461 14.1292 10.3076C14.0079 10.2472 13.9078 10.096 14.0033 9.91023C14.0338 9.84985 14.1815 9.70322 14.216 9.67734C14.6111 9.45251 15.0665 9.52612 15.488 9.6946C15.8784 9.85445 16.174 10.1477 16.5989 10.5623C17.033 11.0631 17.1112 11.2011 17.3585 11.5772C17.554 11.871 17.7317 12.1729 17.8536 12.5185C17.9272 12.7341 17.8317 12.9107 17.5759 13.0188Z"/></svg>
+                <span data-i18n="footer">由 DeepSeek 大肥鱼 生成</span>
+            </div>
+            <p class="footer-note" data-i18n="disclaimer">非官方第三方工具，与游戏开发商、发行商无关；修改游戏文件的风险由使用者自行承担。</p>
+        </footer>
+    </div>
+
+    <dialog id="export-dialog">
+        <h3 data-i18n="exportTitle">导出分辨率</h3>
+        <p class="hint" data-i18n="exportHint">导出正方形、透明背景的 PNG。</p>
+        <label class="check dialog-check"><input type="checkbox" id="export-both-weights"> <span data-i18n="exportBothWeights">同时导出常规 + 加粗</span></label>
+        <button type="button" class="choice" data-choice="512">
+            <strong>512 × 512</strong><span data-i18n="resOriginal">图集原始尺寸</span>
+        </button>
+        <button type="button" class="choice" data-choice="1024">
+            <strong>1024 × 1024</strong><span data-i18n="resHd">2 倍高清</span>
+        </button>
+        <button type="button" class="choice" data-choice="both">
+            <strong data-i18n="exportBoth">两者都导出</strong><span data-i18n="exportBothDesc">打包为一个 zip</span>
+        </button>
+        <button type="button" class="cancel" id="export-cancel" data-i18n="cancel">取消</button>
+    </dialog>
+
+    <script>
+        // 新版排版与原版字体图一致：U+0020 起按字节顺序排到 U+00FE，
+        // 0x80-0x9F 取 Windows-1252 字形；原版图里没有字形的那几格保持空白
+        const CP1252_EXTRA = {
+            0x82: '‚', 0x83: 'ƒ', 0x84: '„', 0x86: '†', 0x87: '‡',
+            0x88: 'ˆ', 0x89: '‰', 0x8A: 'Š', 0x8B: '‹', 0x8C: 'Œ',
+            0x91: '‘', 0x92: '’', 0x93: '“', 0x94: '”', 0x96: '–', 0x97: '—',
+            0x98: '˜', 0x99: '™', 0x9A: 'š', 0x9B: '›', 0x9C: 'œ', 0x9F: 'Ÿ'
+        };
+
+        function buildCp1252Text() {
+            let out = '';
+            for (let code = 0x20; code <= 0xFE; code++) {
+                const extra = CP1252_EXTRA[code];
+                if (extra) out += extra;
+                else if (code === 0x7F || (code >= 0x80 && code <= 0x9F)) out += ' ';
+                else out += String.fromCharCode(code);
+            }
+            return out;
+        }
+
+        // 旧版排版：ASCII 之后补 34 个空格，再接 Latin-1
+        function buildLegacyText() {
+            let out = '';
+            for (let code = 0x20; code <= 0x7E; code++) out += String.fromCharCode(code);
+            out += ' '.repeat(34);
+            for (let code = 0xA1; code <= 0xFE; code++) out += String.fromCharCode(code);
+            return out;
+        }
+
+        const LAYOUTS = { cp1252: buildCp1252Text, legacy: buildLegacyText };
+        let currentLayout = 'cp1252';
+        let text = buildCp1252Text();
+
+        const I18N = {
+            zh: {
+                title: 'Firefight 字体图片生成器',
+                subtitle: '载入 .ttf / .otf 字体，导出 Firefight 可读取的字体图集 PNG，用于替换游戏内字体。',
+                loadFont: '载入字体',
+                notLoaded: '未载入',
+                loaded: '已载入',
+                download: '下载 PNG',
+                sizeLabel: '字号',
+                sizeHint: '可填 px（如 48），也可填放大倍率（如 1.5、1.5x；1× = 32px）。',
+                weight: '字重',
+                regular: '常规',
+                bold: '加粗',
+                layout: '排版',
+                layoutNew: '新版（0x20–0xFE）',
+                layoutLegacy: '旧版（Latin-1）',
+                color: '字色',
+                colorHint: '页面背景随字色自动变深或变浅；导出图片始终是透明背景。',
+                previewTitle: '字符预览',
+                prev: '上一个',
+                next: '下一个',
+                tfW: '拉宽',
+                tfH: '拉高',
+                tfX: '水平位移',
+                tfY: '垂直位移',
+                tfHint: '单位 px：拉宽 / 拉高改变字形外框尺寸，位移正数向右、向下。',
+                clip: '裁剪到格内',
+                resetChar: '重置此字',
+                resetAll: '重置全部',
+                exportTitle: '导出分辨率',
+                exportHint: '导出正方形、透明背景的 PNG。',
+                exportBothWeights: '同时导出常规 + 加粗',
+                resOriginal: '图集原始尺寸',
+                resHd: '2 倍高清',
+                exportBoth: '两者都导出',
+                exportBothDesc: '打包为一个 zip',
+                cancel: '取消',
+                footer: '由 DeepSeek 大肥鱼 生成',
+                disclaimer: '非官方第三方工具，与游戏开发商、发行商无关；修改游戏文件的风险由使用者自行承担。',
+                infoHint: '点击上方画布中的字符格进行预览',
+                infoNoFont: '（字体未载入，当前为回退字体）',
+                infoBlank: function (i) { return '索引 ' + i + ' · 空白格'; },
+                infoLine: function (ch, code, i, w0, h0, w1, h1) {
+                    return '"' + ch + '" U+' + code + ' · 索引 ' + i + ' · 原始 ' + w0 + '×' + h0 + ' → 当前 ' + w1 + '×' + h1 + ' px';
+                }
+            },
+            en: {
+                title: 'Firefight Font Generator',
+                subtitle: 'Load a .ttf / .otf font and export a Firefight-readable atlas PNG to replace the in-game typeface.',
+                loadFont: 'Load font',
+                notLoaded: 'not loaded',
+                loaded: 'loaded',
+                download: 'Download PNG',
+                sizeLabel: 'Size',
+                sizeHint: 'Enter px (e.g. 48) or a scale factor (e.g. 1.5 or 1.5x; 1× = 32px).',
+                weight: 'Weight',
+                regular: 'Regular',
+                bold: 'Bold',
+                layout: 'Layout',
+                layoutNew: 'New (0x20–0xFE)',
+                layoutLegacy: 'Legacy (Latin-1)',
+                color: 'Color',
+                colorHint: 'The page background shifts with the text color; exported images are always transparent.',
+                previewTitle: 'Glyph preview',
+                prev: 'Previous',
+                next: 'Next',
+                tfW: 'Width',
+                tfH: 'Height',
+                tfX: 'Offset X',
+                tfY: 'Offset Y',
+                tfHint: 'In px: width and height change the glyph ink box; offsets move right/down when positive.',
+                clip: 'Clip to cell',
+                resetChar: 'Reset glyph',
+                resetAll: 'Reset all',
+                exportTitle: 'Export size',
+                exportHint: 'Exports a square PNG with a transparent background.',
+                exportBothWeights: 'Also export regular + bold',
+                resOriginal: 'Original atlas size',
+                resHd: '2× high-res',
+                exportBoth: 'Export both',
+                exportBothDesc: 'Bundled as one zip',
+                cancel: 'Cancel',
+                footer: 'Made by DeepSeek 大肥鱼',
+                disclaimer: 'Unofficial third-party tool, not affiliated with the game developer or publisher. Modifying game files is at your own risk.',
+                infoHint: 'Tap a cell on the canvas above to preview',
+                infoNoFont: '(no font loaded, showing fallback)',
+                infoBlank: function (i) { return 'index ' + i + ' · empty cell'; },
+                infoLine: function (ch, code, i, w0, h0, w1, h1) {
+                    return '"' + ch + '" U+' + code + ' · index ' + i + ' · original ' + w0 + '×' + h0 + ' → now ' + w1 + '×' + h1 + ' px';
+                }
+            },
+            ru: {
+                title: 'Генератор шрифтов Firefight',
+                subtitle: 'Загрузите шрифт .ttf / .otf и экспортируйте PNG-атлас, который читает Firefight, для замены шрифта в игре.',
+                loadFont: 'Загрузить шрифт',
+                notLoaded: 'не загружен',
+                loaded: 'загружен',
+                download: 'Скачать PNG',
+                sizeLabel: 'Кегль',
+                sizeHint: 'Введите px (например 48) или множитель (например 1.5 или 1.5x; 1× = 32px).',
+                weight: 'Насыщенность',
+                regular: 'Обычный',
+                bold: 'Жирный',
+                layout: 'Раскладка',
+                layoutNew: 'Новая (0x20–0xFE)',
+                layoutLegacy: 'Старая (Latin-1)',
+                color: 'Цвет',
+                colorHint: 'Фон страницы меняется вместе с цветом текста; PNG всегда с прозрачным фоном.',
+                previewTitle: 'Просмотр символа',
+                prev: 'Предыдущий',
+                next: 'Следующий',
+                tfW: 'Ширина',
+                tfH: 'Высота',
+                tfX: 'Сдвиг X',
+                tfY: 'Сдвиг Y',
+                tfHint: 'Значения в px: ширина и высота меняют контур глифа, сдвиг — вправо/вниз при плюсе.',
+                clip: 'Обрезать по ячейке',
+                resetChar: 'Сбросить символ',
+                resetAll: 'Сбросить всё',
+                exportTitle: 'Размер экспорта',
+                exportHint: 'Экспорт квадратного PNG с прозрачным фоном.',
+                exportBothWeights: 'Экспортировать обычный + жирный',
+                resOriginal: 'Исходный размер атласа',
+                resHd: '2× HD',
+                exportBoth: 'Экспортировать оба',
+                exportBothDesc: 'Одним zip-архивом',
+                cancel: 'Отмена',
+                footer: 'Сделано DeepSeek 大肥鱼',
+                disclaimer: 'Неофициальный сторонний инструмент, не связан с разработчиком или издателем игры. Изменение файлов игры — на ваш риск.',
+                infoHint: 'Нажмите ячейку на холсте выше',
+                infoNoFont: '(шрифт не загружен, показан системный)',
+                infoBlank: function (i) { return 'индекс ' + i + ' · пустая ячейка'; },
+                infoLine: function (ch, code, i, w0, h0, w1, h1) {
+                    return '"' + ch + '" U+' + code + ' · индекс ' + i + ' · было ' + w0 + '×' + h0 + ' → стало ' + w1 + '×' + h1 + ' px';
+                }
+            }
+        };
+
+        let currentLang = 'zh';
+
+        function t(key) {
+            const dict = I18N[currentLang] || I18N.zh;
+            return dict[key] !== undefined ? dict[key] : I18N.zh[key];
+        }
+
+        // 各行列宽按当前语言里最长的标签对齐（先把列宽归零，否则量到的是列宽而不是文字宽）
+        function syncLabelWidth() {
+            document.querySelectorAll('.card').forEach(function (card) {
+                const labels = Array.from(card.querySelectorAll('.control > label'));
+                if (!labels.length) return;
+                card.style.setProperty('--label-w', '0px');
+                let widest = 0;
+                labels.forEach(function (label) {
+                    widest = Math.max(widest, label.scrollWidth);
+                });
+                // 留 2px 余量，避开整数取整后被省略号截掉最后一个字
+                card.style.setProperty('--label-w', (Math.ceil(widest) + 2) + 'px');
+            });
+        }
+
+        function applyLanguage(lang, options) {
+            if (!I18N[lang]) return;
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
+            document.querySelectorAll('[data-i18n]').forEach(function (node) {
+                const value = t(node.dataset.i18n);
+                if (typeof value === 'string') node.textContent = value;
+            });
+            document.querySelectorAll('[data-i18n-aria]').forEach(function (node) {
+                node.setAttribute('aria-label', t(node.dataset.i18nAria));
+            });
+            document.querySelectorAll('#lang-menu button').forEach(function (button) {
+                button.setAttribute('aria-current', String(button.dataset.lang === currentLang));
+            });
+            syncLabelWidth();
+            updateFontLabel();
+            updateInfo();
+            if (!options || !options.silent) saveSettings();
+        }
+
+        const CHAR_WIDTH = 32;
+        const CHAR_HEIGHT = 32;
+        const CHARS_PER_ROW = 16;
+        const ATLAS_SIZE = 512;
+        const FONT_FAMILY = 'customFont';
+        const PREVIEW_SCALE = 8;
+        const PREVIEW_PAD = 12;
+        const BASE_FONT_SIZE = 32;
+        const MIN_FONT_SIZE = 10;
+        const MAX_FONT_SIZE = 100;
+
+        // 单字变形：w/h 为宽高增量，x/y 为位移，单位均为 px
+        const TRANSFORM_KEYS = ['w', 'h', 'x', 'y'];
+        const TRANSFORM_LIMITS = {
+            w: { min: -32, max: 32 },
+            h: { min: -32, max: 32 },
+            x: { min: -16, max: 16 },
+            y: { min: -16, max: 16 }
+        };
+
+        const STORAGE_KEY = 'firefight-font-gen/settings';
+        const DB_NAME = 'firefight-font-gen';
+        const DB_STORE = 'files';
+        const DB_FONT_KEY = 'font-ttf';
+
+        const transforms = new Map();
+        let selectedIndex = text.indexOf('A');
+        let currentFontSize = BASE_FONT_SIZE;
+        let currentColor = '#ffffff';
+        let clipToCell = true;
+        let isBold = false;
+        let fontLoaded = false;
+        let fontName = '';
+        let currentFontFace = null;
+
+        const el = function (id) { return document.getElementById(id); };
+        const atlasCanvas = el('canvas');
+        const previewCanvas = el('preview');
+        const previewInfo = el('preview-info');
+        const sizeRange = el('font-size-range');
+        const sizeInput = el('font-size-input');
+        const colorPicker = el('text-color-picker');
+        const hexInput = el('hex-input');
+        const fontNameLabel = el('font-name');
+        const downloadBtn = el('download-btn');
+        const exportDialog = el('export-dialog');
+        const transformInputs = {};
+        TRANSFORM_KEYS.forEach(function (key) {
+            transformInputs[key] = { num: el('tf-' + key), range: el('tf-' + key + '-range') };
+        });
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        // 只加载了一个字体文件，加粗交给浏览器的合成粗体；bold 不传时跟随当前字重
+        function fontString(size, bold) {
+            const useBold = bold === undefined ? isBold : bold;
+            return (useBold ? 'bold ' : '') + size + 'px ' + FONT_FAMILY;
+        }
+
+        function normalizeHex(value) {
+            if (typeof value !== 'string') return null;
+            let hex = value.trim().replace(/^#/, '');
+            if (/^[0-9a-f]{3}$/i.test(hex)) hex = hex.split('').map(function (c) { return c + c; }).join('');
+            if (!/^[0-9a-f]{6}$/i.test(hex)) return null;
+            return '#' + hex.toLowerCase();
+        }
+
+        function hexToRgb(hex) {
+            const num = parseInt(hex.slice(1), 16);
+            return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+        }
+
+        function toRgba(hex, alpha) {
+            const rgb = hexToRgb(hex);
+            return 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + alpha + ')';
+        }
+
+        function rgbToHsl(rgb) {
+            const r = rgb.r / 255;
+            const g = rgb.g / 255;
+            const b = rgb.b / 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const l = (max + min) / 2;
+            let h = 0;
+            let s = 0;
+            if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+                else if (max === g) h = (b - r) / d + 2;
+                else h = (r - g) / d + 4;
+                h *= 60;
+            }
+            return { h: h, s: s * 100, l: l * 100 };
+        }
+
+        function hslToHex(h, s, l) {
+            const sat = s / 100;
+            const lig = l / 100;
+            const c = (1 - Math.abs(2 * lig - 1)) * sat;
+            const hp = h / 60;
+            const x = c * (1 - Math.abs((hp % 2) - 1));
+            let rgb = [0, 0, 0];
+            if (hp < 1) rgb = [c, x, 0];
+            else if (hp < 2) rgb = [x, c, 0];
+            else if (hp < 3) rgb = [0, c, x];
+            else if (hp < 4) rgb = [0, x, c];
+            else if (hp < 5) rgb = [x, 0, c];
+            else rgb = [c, 0, x];
+            const m = lig - c / 2;
+            const toHex = function (v) {
+                return Math.round((v + m) * 255).toString(16).padStart(2, '0');
+            };
+            return '#' + toHex(rgb[0]) + toHex(rgb[1]) + toHex(rgb[2]);
+        }
+
+        function relativeLuminance(rgb) {
+            const channel = function (value) {
+                const c = value / 255;
+                return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            };
+            return 0.2126 * channel(rgb.r) + 0.7152 * channel(rgb.g) + 0.0722 * channel(rgb.b);
+        }
+
+        // 界面配色只由字色推导：亮字配深底、暗字配浅底，保证预览和控件都有对比
+        const theme = { inkHex: '#e9ebee' };
+
+        function applyTheme(hex) {
+            const rgb = hexToRgb(hex);
+            const hsl = rgbToHsl(rgb);
+            const luminance = relativeLuminance(rgb);
+            // 深底与浅底之间取对比度更高的一侧
+            const lightBg = 0.97 / (luminance + 0.05) >= (luminance + 0.05) / 0.063;
+            const sat = Math.min(hsl.s, 18);
+            const inkSat = Math.min(hsl.s, 8);
+            const bgL = lightBg ? 92 : 12;
+            const inkL = lightBg ? 13 : 94;
+            const root = document.documentElement.style;
+            root.setProperty('--bg', 'hsl(' + hsl.h + ', ' + sat + '%, ' + bgL + '%)');
+            root.setProperty('--surface', 'hsl(' + hsl.h + ', ' + sat + '%, ' + (lightBg ? 97 : 17) + '%)');
+            root.setProperty('--line', 'hsl(' + hsl.h + ', ' + sat + '%, ' + (lightBg ? 87 : 27) + '%)');
+            root.setProperty('--ink', 'hsl(' + hsl.h + ', ' + inkSat + '%, ' + inkL + '%)');
+            root.setProperty('--muted', 'hsl(' + hsl.h + ', ' + inkSat + '%, ' + (lightBg ? 45 : 62) + '%)');
+            root.setProperty('--accent', hex);
+            root.setProperty('--accent-ink', 'hsl(' + hsl.h + ', ' + sat + '%, ' + bgL + '%)');
+            root.colorScheme = lightBg ? 'light' : 'dark';
+            theme.inkHex = hslToHex(hsl.h, inkSat, inkL);
+        }
+
+        // ---------- 存储：设置走 localStorage，字体字节走 IndexedDB ----------
+
+        function readSettings() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function writeSettings(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (error) {
+                // 隐私模式或 file:// 下可能不可用，此时仅本次会话内生效
+            }
+        }
+
+        let saveTimer = null;
+        function saveSettings() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(function () {
+                writeSettings({
+                    fontSize: currentFontSize,
+                    color: currentColor,
+                    clip: clipToCell,
+                    bold: isBold,
+                    layout: currentLayout,
+                    lang: currentLang,
+                    selected: selectedIndex,
+                    fontName: fontName,
+                    transforms: Array.from(transforms.entries())
+                });
+            }, 120);
+        }
+
+        let dbPromise = null;
+        function openDb() {
+            if (!dbPromise) {
+                dbPromise = new Promise(function (resolve, reject) {
+                    if (!window.indexedDB) {
+                        reject(new Error('indexedDB unavailable'));
+                        return;
+                    }
+                    const request = indexedDB.open(DB_NAME, 1);
+                    request.onupgradeneeded = function () { request.result.createObjectStore(DB_STORE); };
+                    request.onsuccess = function () { resolve(request.result); };
+                    request.onerror = function () { reject(request.error); };
+                }).catch(function () { return null; });
+            }
+            return dbPromise;
+        }
+
+        async function idbPut(key, value) {
+            const db = await openDb();
+            if (!db) return;
+            await new Promise(function (resolve) {
+                const tx = db.transaction(DB_STORE, 'readwrite');
+                tx.objectStore(DB_STORE).put(value, key);
+                tx.oncomplete = resolve;
+                tx.onerror = resolve;
+            });
+        }
+
+        async function idbGet(key) {
+            const db = await openDb();
+            if (!db) return null;
+            return new Promise(function (resolve) {
+                const tx = db.transaction(DB_STORE, 'readonly');
+                const request = tx.objectStore(DB_STORE).get(key);
+                request.onsuccess = function () { resolve(request.result || null); };
+                request.onerror = function () { resolve(null); };
+            });
+        }
+
+        // ---------- 绘制 ----------
+
+        function cellOrigin(index, scale) {
+            const s = scale || 1;
+            const col = index % CHARS_PER_ROW;
+            const row = Math.floor(index / CHARS_PER_ROW);
+            const startX = (ATLAS_SIZE - CHAR_WIDTH * CHARS_PER_ROW) * s / 2;
+            return { x: startX + col * CHAR_WIDTH * s, y: row * CHAR_HEIGHT * s };
+        }
+
+        function measureInk(ctx, char, fontSize, bold) {
+            ctx.font = fontString(fontSize, bold);
+            ctx.textBaseline = 'middle';
+            const metrics = ctx.measureText(char);
+            return {
+                advance: metrics.width || 0,
+                width: Math.max((metrics.actualBoundingBoxLeft || 0) + (metrics.actualBoundingBoxRight || 0), 0),
+                height: Math.max((metrics.actualBoundingBoxAscent || 0) + (metrics.actualBoundingBoxDescent || 0), 0)
+            };
+        }
+
+        // 以格子中心为基准缩放：先把「原宽高 + 增量(px)」换算成缩放比，再叠加位移
+        function drawGlyph(ctx, char, cx, cy, fontSize, color, transform, clipRect, bold) {
+            const ink = measureInk(ctx, char, fontSize, bold);
+            let scaleX = 1;
+            let scaleY = 1;
+            if (transform) {
+                if (transform.w && ink.width > 0.01) scaleX = clamp((ink.width + transform.w) / ink.width, 0.02, 50);
+                if (transform.h && ink.height > 0.01) scaleY = clamp((ink.height + transform.h) / ink.height, 0.02, 50);
+            }
+            const offsetX = transform ? transform.x || 0 : 0;
+            const offsetY = transform ? transform.y || 0 : 0;
+
+            ctx.save();
+            if (clipRect) {
+                ctx.beginPath();
+                ctx.rect(clipRect.x, clipRect.y, clipRect.w, clipRect.h);
+                ctx.clip();
+            }
+            if (offsetX || offsetY || scaleX !== 1 || scaleY !== 1) {
+                ctx.translate(cx + offsetX, cy + offsetY);
+                ctx.scale(scaleX, scaleY);
+                ctx.translate(-cx, -cy);
+            }
+            ctx.fillStyle = color;
+            ctx.fillText(char, cx - ink.advance / 2, cy);
+            ctx.restore();
+        }
+
+        // 图集始终是透明底：只画字形，不铺任何背景色；scale 用于导出高清图
+        function drawAtlas(ctx, scale, withSelection, bold) {
+            const s = scale || 1;
+            const size = ATLAS_SIZE * s;
+            const cellW = CHAR_WIDTH * s;
+            const cellH = CHAR_HEIGHT * s;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, size, size);
+            for (let i = 0; i < text.length; i++) {
+                const char = text.charAt(i);
+                const origin = cellOrigin(i, s);
+                const transform = transforms.get(char);
+                const scaled = transform
+                    ? { w: transform.w * s, h: transform.h * s, x: transform.x * s, y: transform.y * s }
+                    : null;
+                const clipRect = clipToCell ? { x: origin.x, y: origin.y, w: cellW, h: cellH } : null;
+                drawGlyph(ctx, char, origin.x + cellW / 2, origin.y + cellH / 2, currentFontSize * s, currentColor, scaled, clipRect, bold);
+            }
+            if (withSelection && selectedIndex >= 0 && selectedIndex < text.length) {
+                const origin = cellOrigin(selectedIndex, s);
+                ctx.save();
+                ctx.strokeStyle = toRgba(theme.inkHex, 0.75);
+                ctx.lineWidth = s;
+                ctx.strokeRect(origin.x + s / 2, origin.y + s / 2, cellW - s, cellH - s);
+                ctx.restore();
+            }
+        }
+
+        function renderAtlas(withSelection) {
+            drawAtlas(atlasCanvas.getContext('2d'), 1, withSelection);
+        }
+
+        function exportAtlas(size, bold) {
+            const scale = size / ATLAS_SIZE;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            drawAtlas(canvas.getContext('2d'), scale, false, bold);
+            return canvas.toDataURL('image/png');
+        }
+
+        function dataUrlToBytes(dataUrl) {
+            const binary = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes;
+        }
+
+        const CRC_TABLE = (function () {
+            const table = new Uint32Array(256);
+            for (let i = 0; i < 256; i++) {
+                let c = i;
+                for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+                table[i] = c >>> 0;
+            }
+            return table;
+        })();
+
+        function crc32(bytes) {
+            let crc = 0xFFFFFFFF;
+            for (let i = 0; i < bytes.length; i++) crc = CRC_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+            return (crc ^ 0xFFFFFFFF) >>> 0;
+        }
+
+        // 不压缩的 zip（store），只为把多个 PNG 合成一次下载
+        function buildZip(entries) {
+            const encoder = new TextEncoder();
+            const parts = [];
+            const central = [];
+            let offset = 0;
+            const dosTime = 0;
+            const dosDate = ((2024 - 1980) << 9) | (1 << 5) | 1;
+
+            entries.forEach(function (entry) {
+                const nameBytes = encoder.encode(entry.name);
+                const crc = crc32(entry.bytes);
+                const size = entry.bytes.length;
+
+                const local = new Uint8Array(30 + nameBytes.length);
+                const lv = new DataView(local.buffer);
+                lv.setUint32(0, 0x04034b50, true);
+                lv.setUint16(4, 20, true);
+                lv.setUint16(6, 0x0800, true);
+                lv.setUint16(8, 0, true);
+                lv.setUint16(10, dosTime, true);
+                lv.setUint16(12, dosDate, true);
+                lv.setUint32(14, crc, true);
+                lv.setUint32(18, size, true);
+                lv.setUint32(22, size, true);
+                lv.setUint16(26, nameBytes.length, true);
+                lv.setUint16(28, 0, true);
+                local.set(nameBytes, 30);
+
+                const header = new Uint8Array(46 + nameBytes.length);
+                const cv = new DataView(header.buffer);
+                cv.setUint32(0, 0x02014b50, true);
+                cv.setUint16(4, 20, true);
+                cv.setUint16(6, 20, true);
+                cv.setUint16(8, 0x0800, true);
+                cv.setUint16(10, 0, true);
+                cv.setUint16(12, dosTime, true);
+                cv.setUint16(14, dosDate, true);
+                cv.setUint32(16, crc, true);
+                cv.setUint32(20, size, true);
+                cv.setUint32(24, size, true);
+                cv.setUint16(28, nameBytes.length, true);
+                cv.setUint16(30, 0, true);
+                cv.setUint16(32, 0, true);
+                cv.setUint16(34, 0, true);
+                cv.setUint16(36, 0, true);
+                cv.setUint32(38, 0, true);
+                cv.setUint32(42, offset, true);
+                header.set(nameBytes, 46);
+
+                parts.push(local, entry.bytes);
+                central.push(header);
+                offset += local.length + size;
+            });
+
+            let centralSize = 0;
+            central.forEach(function (chunk) { centralSize += chunk.length; });
+            const end = new Uint8Array(22);
+            const ev = new DataView(end.buffer);
+            ev.setUint32(0, 0x06054b50, true);
+            ev.setUint16(8, entries.length, true);
+            ev.setUint16(10, entries.length, true);
+            ev.setUint32(12, centralSize, true);
+            ev.setUint32(16, offset, true);
+            return new Blob(parts.concat(central, [end]), { type: 'application/zip' });
+        }
+
+        function saveBlob(blob, name) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = name;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+        }
+
+        // 多个文件逐个下载会被浏览器拦掉第二个，因此多文件统一打包成 zip
+        function runExport(choice, bothWeights) {
+            const sizes = choice === 'both' ? [512, 1024] : [Number(choice)];
+            const jobs = [];
+            sizes.forEach(function (size) {
+                if (bothWeights) {
+                    jobs.push({ size: size, bold: false, name: 'font_image_' + size + '_regular.png' });
+                    jobs.push({ size: size, bold: true, name: 'font_image_' + size + '_bold.png' });
+                } else {
+                    jobs.push({ size: size, bold: isBold, name: 'font_image_' + size + (isBold ? '_bold' : '') + '.png' });
+                }
+            });
+            if (jobs.length === 1) {
+                const link = document.createElement('a');
+                link.download = jobs[0].name;
+                link.href = exportAtlas(jobs[0].size, jobs[0].bold);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                return;
+            }
+            const entries = jobs.map(function (job) {
+                return { name: job.name, bytes: dataUrlToBytes(exportAtlas(job.size, job.bold)) };
+            });
+            saveBlob(buildZip(entries), 'font_image.zip');
+        }
+
+        function renderPreview() {
+            const ctx = previewCanvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+            const char = selectedChar();
+            if (char === null) {
+                updateInfo();
+                return;
+            }
+            const transform = transformOf(char);
+
+            ctx.setTransform(PREVIEW_SCALE, 0, 0, PREVIEW_SCALE, PREVIEW_PAD, PREVIEW_PAD);
+            ctx.fillStyle = toRgba(theme.inkHex, 0.05);
+            ctx.fillRect(0, 0, CHAR_WIDTH, CHAR_HEIGHT);
+
+            if (!isBlankChar(char)) {
+                // 未变形字形作为参照
+                ctx.globalAlpha = 0.25;
+                drawGlyph(ctx, char, CHAR_WIDTH / 2, CHAR_HEIGHT / 2, currentFontSize, currentColor, null, null);
+                ctx.globalAlpha = 1;
+
+                if (clipToCell && (transform.w || transform.h || transform.x || transform.y)) {
+                    // 溢出格子的部分标红，便于判断会不会被裁掉
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(-CHAR_WIDTH * 2, -CHAR_HEIGHT * 2, CHAR_WIDTH * 5, CHAR_HEIGHT * 5);
+                    ctx.rect(0, 0, CHAR_WIDTH, CHAR_HEIGHT);
+                    ctx.clip('evenodd');
+                    ctx.globalAlpha = 0.55;
+                    drawGlyph(ctx, char, CHAR_WIDTH / 2, CHAR_HEIGHT / 2, currentFontSize, '#ff5c5c', transform, null);
+                    ctx.restore();
+                }
+
+                const cellRect = clipToCell ? { x: 0, y: 0, w: CHAR_WIDTH, h: CHAR_HEIGHT } : null;
+                drawGlyph(ctx, char, CHAR_WIDTH / 2, CHAR_HEIGHT / 2, currentFontSize, currentColor, transform, cellRect);
+            }
+
+            ctx.lineWidth = 1 / PREVIEW_SCALE;
+            ctx.strokeStyle = toRgba(theme.inkHex, 0.35);
+            ctx.strokeRect(0, 0, CHAR_WIDTH, CHAR_HEIGHT);
+
+            updateInfo();
+        }
+
+        function updateInfo() {
+            const char = selectedChar();
+            if (char === null) {
+                previewInfo.textContent = t('infoHint');
+                return;
+            }
+            const prefix = fontLoaded ? '' : t('infoNoFont');
+            if (isBlankChar(char)) {
+                previewInfo.textContent = prefix + t('infoBlank')(selectedIndex);
+                return;
+            }
+            const ink = measureInk(atlasCanvas.getContext('2d'), char, currentFontSize);
+            const transform = transformOf(char);
+            const width = ink.width + (transform.w || 0);
+            const height = ink.height + (transform.h || 0);
+            const code = char.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0');
+            previewInfo.textContent = prefix + t('infoLine')(char, code, selectedIndex,
+                ink.width.toFixed(1), ink.height.toFixed(1), width.toFixed(1), height.toFixed(1));
+        }
+
+        // ---------- 状态读写 ----------
+
+        function selectedChar() {
+            return selectedIndex >= 0 && selectedIndex < text.length ? text.charAt(selectedIndex) : null;
+        }
+
+        function isBlankChar(char) {
+            return char === ' ' || char === '\u00A0';
+        }
+
+        function transformOf(char) {
+            return (char && transforms.get(char)) || { w: 0, h: 0, x: 0, y: 0 };
+        }
+
+        function ensureTransform(char) {
+            let transform = transforms.get(char);
+            if (!transform) {
+                transform = { w: 0, h: 0, x: 0, y: 0 };
+                transforms.set(char, transform);
+            }
+            return transform;
+        }
+
+        function syncTransformInputs(keepNumbers) {
+            const transform = transformOf(selectedChar());
+            TRANSFORM_KEYS.forEach(function (key) {
+                const value = transform[key] || 0;
+                const limit = TRANSFORM_LIMITS[key];
+                if (!keepNumbers) transformInputs[key].num.value = value;
+                transformInputs[key].range.value = clamp(value, limit.min, limit.max);
+            });
+            const char = selectedChar();
+            el('reset-char-btn').disabled = !(char && transforms.has(char));
+            el('reset-all-btn').disabled = transforms.size === 0;
+        }
+
+        function updateSizeUI(rewriteInput) {
+            sizeRange.value = currentFontSize;
+            if (rewriteInput) sizeInput.value = currentFontSize;
+        }
+
+        function updateFontLabel() {
+            fontNameLabel.textContent = fontLoaded ? (fontName || t('loaded')) : t('notLoaded');
+            downloadBtn.disabled = !fontLoaded;
+        }
+
+        function syncWeightUI() {
+            document.querySelectorAll('#weight-seg button').forEach(function (button) {
+                button.setAttribute('aria-pressed', String((button.dataset.bold === '1') === isBold));
+            });
+        }
+
+        function redraw() {
+            renderAtlas(true);
+            renderPreview();
+        }
+
+        function selectIndex(index) {
+            if (index < 0 || index >= text.length) return;
+            selectedIndex = index;
+            syncTransformInputs(false);
+            saveSettings();
+            redraw();
+        }
+
+        function setLayout(layout) {
+            if (!LAYOUTS[layout] || layout === currentLayout) return;
+            currentLayout = layout;
+            text = LAYOUTS[layout]();
+            if (selectedIndex >= text.length) selectedIndex = text.length - 1;
+            el('layout-select').value = layout;
+            syncTransformInputs(false);
+            saveSettings();
+            redraw();
+        }
+
+        // ---------- 字号 ----------
+
+        function parseSizeInput(raw) {
+            const value = String(raw).trim().toLowerCase().replace(/×/g, 'x').replace(/,/g, '.');
+            if (!value) return null;
+            const multiplier = value.match(/^([0-9]*\.?[0-9]+)\s*x$/);
+            if (multiplier) return BASE_FONT_SIZE * parseFloat(multiplier[1]);
+            const number = parseFloat(value);
+            if (!isFinite(number) || number <= 0) return null;
+            // 小于最小字号的数值只可能是倍率，如 1.5 = 48px
+            return number < MIN_FONT_SIZE ? BASE_FONT_SIZE * number : number;
+        }
+
+        function setFontSize(size, options) {
+            currentFontSize = clamp(Math.round(size), MIN_FONT_SIZE, MAX_FONT_SIZE);
+            updateSizeUI(!!(options && options.rewriteInput));
+            saveSettings();
+            redraw();
+        }
+
+        // ---------- 字色 ----------
+
+        function setColor(hex, options) {
+            const normalized = normalizeHex(hex);
+            if (!normalized) return;
+            currentColor = normalized;
+            colorPicker.value = normalized;
+            if (options && options.rewriteHex) hexInput.value = normalized;
+            applyTheme(normalized);
+            saveSettings();
+            redraw();
+        }
+
+        // ---------- 字体 ----------
+
+        async function useFont(buffer, name) {
+            const face = new FontFace(FONT_FAMILY, buffer);
+            await face.load();
+            if (currentFontFace) document.fonts.delete(currentFontFace);
+            document.fonts.add(face);
+            currentFontFace = face;
+            fontLoaded = true;
+            fontName = name || '';
+            updateFontLabel();
+            redraw();
+        }
+
+        async function restoreFont() {
+            const record = await idbGet(DB_FONT_KEY);
+            if (!record || !record.buffer) return;
+            try {
+                await useFont(record.buffer, record.name);
+            } catch (error) {
+                fontNameLabel.textContent = '上次的字体无法恢复';
+            }
+        }
+
+        // ---------- 事件绑定 ----------
+
+        TRANSFORM_KEYS.forEach(function (key) {
+            const num = transformInputs[key].num;
+            const range = transformInputs[key].range;
+
+            function apply(value, fromNumber) {
+                const char = selectedChar();
+                if (!char) return;
+                const parsed = parseFloat(value);
+                if (!isFinite(parsed)) return;
+                ensureTransform(char)[key] = parsed;
+                // 拖动滑块时同步数字框；手输数字时不覆盖正在编辑的文本
+                syncTransformInputs(fromNumber);
+                saveSettings();
+                redraw();
+            }
+
+            num.addEventListener('input', function (event) { apply(event.target.value, true); });
+            num.addEventListener('change', function () { syncTransformInputs(false); });
+            range.addEventListener('input', function (event) { apply(event.target.value, false); });
+        });
+
+        sizeRange.addEventListener('input', function () {
+            setFontSize(parseFloat(sizeRange.value), { rewriteInput: true });
+        });
+
+        sizeInput.addEventListener('input', function () {
+            const raw = sizeInput.value;
+            const trimmed = raw.trim();
+            // “4” 这种可能是“48”的前缀，等换行/失焦再当成倍率处理，避免输入过程跳变
+            const complete = /x$/i.test(trimmed) || trimmed.indexOf('.') >= 0 || parseFloat(trimmed) >= MIN_FONT_SIZE;
+            if (!complete) return;
+            const size = parseSizeInput(raw);
+            if (size !== null) setFontSize(size);
+        });
+
+        sizeInput.addEventListener('change', function () {
+            const size = parseSizeInput(sizeInput.value);
+            if (size !== null) setFontSize(size, { rewriteInput: true });
+            else sizeInput.value = currentFontSize;
+        });
+
+        colorPicker.addEventListener('input', function () {
+            setColor(colorPicker.value, { rewriteHex: true });
+        });
+
+        hexInput.addEventListener('input', function () {
+            const normalized = normalizeHex(hexInput.value);
+            if (normalized) setColor(normalized);
+        });
+
+        hexInput.addEventListener('change', function () {
+            const normalized = normalizeHex(hexInput.value);
+            if (normalized) setColor(normalized, { rewriteHex: true });
+            else hexInput.value = currentColor;
+        });
+
+        el('font-input').addEventListener('change', async function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const buffer = await file.arrayBuffer();
+            event.target.value = '';
+            try {
+                await useFont(buffer, file.name);
+                idbPut(DB_FONT_KEY, { buffer: buffer, name: file.name });
+                saveSettings();
+            } catch (error) {
+                fontNameLabel.textContent = '字体载入失败';
+            }
+        });
+
+        el('prev-char').addEventListener('click', function () { selectIndex(selectedIndex - 1); });
+        el('next-char').addEventListener('click', function () { selectIndex(selectedIndex + 1); });
+
+        el('reset-char-btn').addEventListener('click', function () {
+            const char = selectedChar();
+            if (char) transforms.delete(char);
+            syncTransformInputs(false);
+            saveSettings();
+            redraw();
+        });
+
+        el('reset-all-btn').addEventListener('click', function () {
+            transforms.clear();
+            syncTransformInputs(false);
+            saveSettings();
+            redraw();
+        });
+
+        el('clip-toggle').addEventListener('change', function (event) {
+            clipToCell = event.target.checked;
+            saveSettings();
+            redraw();
+        });
+
+        el('layout-select').addEventListener('change', function (event) {
+            setLayout(event.target.value);
+        });
+
+        el('lang-btn').addEventListener('click', function (event) {
+            event.stopPropagation();
+            const menu = el('lang-menu');
+            menu.hidden = !menu.hidden;
+            el('lang-btn').setAttribute('aria-expanded', String(!menu.hidden));
+        });
+
+        el('lang-menu').addEventListener('click', function (event) {
+            const button = event.target.closest('button[data-lang]');
+            if (!button) return;
+            el('lang-menu').hidden = true;
+            el('lang-btn').setAttribute('aria-expanded', 'false');
+            applyLanguage(button.dataset.lang);
+        });
+
+        document.addEventListener('click', function () {
+            if (el('lang-menu').hidden) return;
+            el('lang-menu').hidden = true;
+            el('lang-btn').setAttribute('aria-expanded', 'false');
+        });
+
+        el('weight-seg').addEventListener('click', function (event) {
+            const button = event.target.closest('button');
+            if (!button) return;
+            const next = button.dataset.bold === '1';
+            if (next === isBold) return;
+            isBold = next;
+            syncWeightUI();
+            saveSettings();
+            redraw();
+        });
+
+        atlasCanvas.addEventListener('click', function (event) {
+            const rect = atlasCanvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width * ATLAS_SIZE;
+            const y = (event.clientY - rect.top) / rect.height * ATLAS_SIZE;
+            const col = Math.floor((x - (ATLAS_SIZE - CHAR_WIDTH * CHARS_PER_ROW) / 2) / CHAR_WIDTH);
+            const row = Math.floor(y / CHAR_HEIGHT);
+            if (col < 0 || col >= CHARS_PER_ROW || row < 0) return;
+            selectIndex(row * CHARS_PER_ROW + col);
+        });
+
+        downloadBtn.addEventListener('click', function () {
+            if (!fontLoaded) return;
+            exportDialog.showModal();
+        });
+
+        // 该 WebView 里 dialog 的 close 事件不会触发，所以在选项上手直接导出
+        exportDialog.querySelectorAll('button[data-choice]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                exportDialog.close();
+                runExport(button.dataset.choice, el('export-both-weights').checked);
+            });
+        });
+
+        el('export-cancel').addEventListener('click', function () {
+            exportDialog.close();
+        });
+
+        // ---------- 启动 ----------
+
+        async function init() {
+            const saved = readSettings();
+            if (saved) {
+                if (saved.layout && LAYOUTS[saved.layout]) {
+                    currentLayout = saved.layout;
+                    text = LAYOUTS[currentLayout]();
+                }
+                if (saved.lang && I18N[saved.lang]) currentLang = saved.lang;
+                if (typeof saved.fontSize === 'number' && isFinite(saved.fontSize)) {
+                    currentFontSize = clamp(Math.round(saved.fontSize), MIN_FONT_SIZE, MAX_FONT_SIZE);
+                }
+                const savedColor = normalizeHex(saved.color);
+                if (savedColor) currentColor = savedColor;
+                if (typeof saved.clip === 'boolean') clipToCell = saved.clip;
+                if (typeof saved.bold === 'boolean') isBold = saved.bold;
+                if (typeof saved.selected === 'number' && saved.selected >= 0 && saved.selected < text.length) {
+                    selectedIndex = saved.selected;
+                }
+                if (Array.isArray(saved.transforms)) {
+                    saved.transforms.forEach(function (entry) {
+                        if (!Array.isArray(entry) || typeof entry[0] !== 'string' || !entry[1]) return;
+                        const t = entry[1];
+                        transforms.set(entry[0], {
+                            w: Number(t.w) || 0,
+                            h: Number(t.h) || 0,
+                            x: Number(t.x) || 0,
+                            y: Number(t.y) || 0
+                        });
+                    });
+                }
+                if (saved.fontName) fontName = saved.fontName;
+            }
+
+            colorPicker.value = currentColor;
+            hexInput.value = currentColor;
+            el('clip-toggle').checked = clipToCell;
+            el('layout-select').value = currentLayout;
+            syncWeightUI();
+            updateSizeUI(true);
+            syncTransformInputs(false);
+            applyTheme(currentColor);
+            applyLanguage(currentLang, { silent: true });
+            redraw();
+
+            await restoreFont();
+        }
+
+        init();
+    </script>
+</body>
+</html>
+
+<!-- 原作者备注
+What's this? It's a font generator that can change your mod's typeface.
+How to use it? Upload the .ttf file in it and then download the image.
+Can I use it? Yes! It's my pleasure that my tool can help you in your mod edit!
+-->
