@@ -430,7 +430,7 @@
             bottom: 0;
             left: 0;
             width: 0;
-            border-radius: 8px;
+            border-radius: 0;
             background: var(--accent);
             transition: transform .24s cubic-bezier(.34, .9, .3, 1), width .24s cubic-bezier(.34, .9, .3, 1);
         }
@@ -610,7 +610,7 @@
         .manual-mock .cp-panel { display: none !important; }
         .manual-mock .seg-pill { display: none; }
         .manual-mock .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
-        .manual-mock canvas { max-width: 76px; border-radius: 6px; }
+        .manual-mock canvas { display: block; max-width: 96px; border-radius: 6px; }
 
         @media (max-width: 420px) {
             .wrap { padding: 20px 12px 40px; }
@@ -1111,15 +1111,23 @@
             else if (key === 'reset') source = el('reset-all-btn').parentElement;
             if (!source) return null;
 
+            if (key === 'preview') {
+                const wrap = document.createElement('div');
+                wrap.className = 'manual-mock';
+                const clone = source.cloneNode(true);
+                clone.removeAttribute('id');
+                wrap.appendChild(clone);
+                const ctx = clone.getContext('2d');
+                if (ctx) ctx.drawImage(source, 0, 0);
+                wrap.inert = true;
+                return wrap;
+            }
+
             const clone = source.cloneNode(true);
             clone.querySelectorAll('[id]').forEach(function (node) { node.removeAttribute('id'); });
             clone.removeAttribute('id');
             clone.classList.add('manual-mock');
             clone.querySelectorAll('.dropdown-menu, .cp-panel').forEach(function (node) { node.remove(); });
-            if (key === 'preview') {
-                const ctx = clone.getContext('2d');
-                if (ctx) ctx.drawImage(source, 0, 0);
-            }
             clone.inert = true;
             return clone;
         }
@@ -2129,6 +2137,8 @@
         el('clear-font-btn').addEventListener('click', clearFont);
 
         el('manual-btn').addEventListener('click', function () {
+            // 打开前重建一次示意，保证字符预览等克隆到的是当前画面
+            renderManual();
             openDialog(el('manual-dialog'));
         });
 
