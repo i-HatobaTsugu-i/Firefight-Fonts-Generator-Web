@@ -398,6 +398,13 @@
 
         .update-actions { display: flex; gap: 10px; margin-top: 16px; }
         .update-actions button { flex: 1; }
+
+        .legal-heading { margin: 14px 0 6px; font-size: 12.5px; font-weight: 600; }
+        .legal-heading:first-child { margin-top: 0; }
+        .legal-block { font-size: 12.5px; line-height: 1.65; color: var(--muted); }
+        .legal-block ul { margin: 0; padding-left: 18px; }
+        .legal-block li { margin-bottom: 6px; }
+        .legal-block p { margin: 6px 0; }
         .footer-note { margin: 0; max-width: 32em; font-size: 11px; line-height: 1.55; opacity: .78; }
 
         /* ---------- 手册按钮 ---------- */
@@ -825,8 +832,23 @@
         <button type="button" class="cancel" id="export-cancel" data-i18n="cancel">取消</button>
     </dialog>
 
-    <dialog id="update-dialog">
+    <dialog id="legal-dialog">
         <div class="manual-head">
+            <h3 data-i18n="legalTitle">免责声明与用户协议</h3>
+            <button class="icon" id="legal-close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="manual-body">
+            <h4 class="legal-heading" data-i18n="legalDisclaimerHeading">免责声明</h4>
+            <div class="legal-block" id="legal-disclaimer"></div>
+            <h4 class="legal-heading" data-i18n="legalTermsHeading">用户协议</h4>
+            <div class="legal-block" id="legal-terms"></div>
+            <div class="update-actions">
+                <button class="primary" id="legal-ok" type="button" data-i18n="legalOk">我已了解</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="update-dialog">        <div class="manual-head">
             <h3 data-i18n="updateTitle">发现新版本</h3>
             <button class="icon" id="update-close" type="button" aria-label="关闭">×</button>
         </div>
@@ -935,6 +957,22 @@
                 updateBody: function (current, latest) {
                     return '当前版本 ' + current + '，最新版本 ' + latest + '。是否前往下载？';
                 },
+                legalTitle: '免责声明与用户协议',
+                legalDisclaimerHeading: '免责声明',
+                legalTermsHeading: '用户协议',
+                legalOk: '我已了解',
+                legalDisclaimer: [
+                    '本工具是非官方第三方工具，与 Firefight 的开发商、发行商及其关联方无隶属、代理或授权关系。',
+                    '工具只负责把你自己提供的字体文件渲染成 PNG 图集，不包含也不分发任何游戏原始资源。',
+                    '替换游戏字体可能导致游戏崩溃、存档异常，或被反作弊 / 联机服务判定违规，风险由使用者自行承担。',
+                    '字体文件的版权与授权归其作者所有，请确认你有权使用并分发。'
+                ],
+                legalTerms: [
+                    '允许自由转载与二次创作，请保留作者署名与本项目链接。',
+                    '禁止商用。',
+                    '使用本工具生成的字体文件，其版权、授权与署名由使用者自行负责，与作者无关。',
+                    '本协议可能随版本更新调整，以仓库中 README 的当前内容为准。'
+                ],
                 disclaimer: '非官方第三方工具，与游戏开发商、发行商无关；修改游戏文件的风险由使用者自行承担。',
                 manualTitle: '用户手册',
                 manualIntro: '每个控件的作用，按界面从上到下排列。',
@@ -1015,6 +1053,21 @@
                 updateBody: function (current, latest) {
                     return 'Current version ' + current + ', latest version ' + latest + '. Open the download page?';
                 },
+                legalTitle: 'Disclaimer and terms',
+                legalDisclaimerHeading: 'Disclaimer',
+                legalTermsHeading: 'Terms of use',
+                legalOk: 'Got it',
+                legalDisclaimer: [
+                    'This is an unofficial third-party tool. It is not affiliated with, endorsed by, or authorized by the developers or publishers of Firefight.',
+                    'The tool only renders the font file you provide into a PNG atlas. It contains and distributes no original game assets.',
+                    'Replacing in-game fonts may crash the game, corrupt saves, or be flagged by anti-cheat or online services. You use it at your own risk.',
+                    'Font files remain the property of their authors — make sure you have the right to use and redistribute them.'
+                ],
+                legalTerms: [
+                    'Free to redistribute and modify; keep the author credit and a link to this project.',
+                    'Commercial use is not allowed.',
+                    'Copyright, licensing and attribution of the font files you generate are your responsibility, not the author.'
+                ],
                 disclaimer: 'Unofficial third-party tool, not affiliated with the game developer or publisher. Modifying game files is at your own risk.',
                 manualTitle: 'User manual',
                 manualIntro: 'What each control does, top to bottom.',
@@ -1095,6 +1148,21 @@
                 updateBody: function (current, latest) {
                     return 'Текущая версия ' + current + ', последняя версия ' + latest + '. Открыть страницу загрузки?';
                 },
+                legalTitle: 'Отказ от ответственности и условия',
+                legalDisclaimerHeading: 'Отказ от ответственности',
+                legalTermsHeading: 'Условия использования',
+                legalOk: 'Понятно',
+                legalDisclaimer: [
+                    'Это неофициальный сторонний инструмент. Он не связан с разработчиками и издателями Firefight, не одобрен и не авторизован ими.',
+                    'Инструмент только отрисовывает ваш собственный файл шрифта в PNG-атлас. Оригинальные ресурсы игры он не содержит и не распространяет.',
+                    'Замена шрифта в игре может привести к вылетам, повреждению сохранений или блокировке античитом и сетевыми сервисами. Ответственность несёт пользователь.',
+                    'Права на файлы шрифтов принадлежат их авторам — убедитесь, что вы вправе их использовать и распространять.'
+                ],
+                legalTerms: [
+                    'Разрешено свободно распространять и дорабатывать проект; сохраняйте имя автора и ссылку на него.',
+                    'Коммерческое использование запрещено.',
+                    'Авторские права, лицензии и указание авторства для сгенерированных файлов шрифтов — ответственность пользователя, а не автора инструмента.'
+                ],
                 disclaimer: 'Неофициальный сторонний инструмент, не связан с разработчиком или издателем игры. Изменение файлов игры — на ваш риск.',
                 manualTitle: 'Руководство',
                 manualIntro: 'Что делает каждый элемент интерфейса — сверху вниз.',
@@ -1276,7 +1344,7 @@
         const MAX_FONT_SIZE = 100;
 
         // 版本号：日期 + 当天第几次修改；每次改动递增（CI 从这里读版本号打 Release）
-        const APP_VERSION = '2026.10.28.3';
+        const APP_VERSION = '2026.10.28.4';
 
         // 单字变形：w/h 为宽高增量，x/y 为位移，单位均为 px
         const TRANSFORM_KEYS = ['w', 'h', 'x', 'y'];
@@ -2326,6 +2394,96 @@
             closeDialog(el('update-dialog'));
         }
 
+        // ---------- 启动声明（实时读取仓库里的 README） ----------
+
+        const README_FILES = { zh: 'README.md', en: 'README.en.md', ru: 'README.ru.md' };
+        const README_BASE = 'https://raw.githubusercontent.com/i-HatobaTsugu-i/Firefight-Fonts-Generator-Web/main/';
+
+        function renderLegalLines(container, lines) {
+            container.textContent = '';
+            const list = document.createElement('ul');
+            (lines || []).forEach(function (line) {
+                const item = document.createElement('li');
+                item.textContent = line;
+                list.appendChild(item);
+            });
+            container.appendChild(list);
+        }
+
+        function renderLegalFallback() {
+            renderLegalLines(el('legal-disclaimer'), t('legalDisclaimer'));
+            renderLegalLines(el('legal-terms'), t('legalTerms'));
+        }
+
+        // 取出 markdown 里某个二级标题下的内容
+        function markdownSection(markdown, heading) {
+            const lines = markdown.split(/\r?\n/);
+            const out = [];
+            let collecting = false;
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (/^##\s+/.test(line)) {
+                    if (collecting) break;
+                    collecting = line.indexOf(heading) >= 0;
+                    continue;
+                }
+                if (collecting) out.push(line);
+            }
+            return out.join('\n').trim();
+        }
+
+        function renderMarkdown(container, text) {
+            container.textContent = '';
+            let list = null;
+            text.split(/\r?\n/).forEach(function (raw) {
+                const line = raw.trim();
+                if (!line) {
+                    list = null;
+                    return;
+                }
+                if (/^[-*]\s+/.test(line)) {
+                    if (!list) {
+                        list = document.createElement('ul');
+                        container.appendChild(list);
+                    }
+                    const item = document.createElement('li');
+                    item.textContent = line.replace(/^[-*]\s+/, '').replace(/\*\*/g, '');
+                    list.appendChild(item);
+                    return;
+                }
+                list = null;
+                const paragraph = document.createElement('p');
+                paragraph.textContent = line.replace(/\*\*/g, '');
+                container.appendChild(paragraph);
+            });
+        }
+
+        async function loadLegalFromRepo() {
+            try {
+                const file = README_FILES[currentLang] || README_FILES.zh;
+                const response = await fetch(README_BASE + file, { cache: 'no-store' });
+                if (!response.ok) return;
+                const markdown = await response.text();
+                const disclaimer = markdownSection(markdown, t('legalDisclaimerHeading'));
+                const terms = markdownSection(markdown, t('legalTermsHeading'));
+                if (disclaimer) renderMarkdown(el('legal-disclaimer'), disclaimer);
+                if (terms) renderMarkdown(el('legal-terms'), terms);
+            } catch (error) {
+                // 离线时保留内置文案
+            }
+        }
+
+        function showLegal() {
+            renderLegalFallback();
+            openDialog(el('legal-dialog'));
+            loadLegalFromRepo();
+        }
+
+        function closeLegal() {
+            closeDialog(el('legal-dialog'));
+            checkForUpdate();
+        }
+
         // ---------- 事件绑定 ----------
 
         TRANSFORM_KEYS.forEach(function (key) {
@@ -2428,6 +2586,13 @@
             clipToCell = event.target.checked;
             saveSettings();
             redraw();
+        });
+
+        el('legal-ok').addEventListener('click', closeLegal);
+        el('legal-close').addEventListener('click', closeLegal);
+        el('legal-dialog').addEventListener('cancel', function (event) {
+            event.preventDefault();
+            closeLegal();
         });
 
         el('update-go').addEventListener('click', function () {
@@ -2566,7 +2731,7 @@
             moveSelection(false);
 
             await restoreFont();
-            checkForUpdate();
+            showLegal();
         }
 
         init();
