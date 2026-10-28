@@ -395,6 +395,9 @@
             transition: color .15s ease, border-color .15s ease;
         }
         .footer-link:hover { color: var(--ink); border-color: var(--accent); }
+
+        .update-actions { display: flex; gap: 10px; margin-top: 16px; }
+        .update-actions button { flex: 1; }
         .footer-note { margin: 0; max-width: 32em; font-size: 11px; line-height: 1.55; opacity: .78; }
 
         /* ---------- 手册按钮 ---------- */
@@ -822,6 +825,20 @@
         <button type="button" class="cancel" id="export-cancel" data-i18n="cancel">取消</button>
     </dialog>
 
+    <dialog id="update-dialog">
+        <div class="manual-head">
+            <h3 data-i18n="updateTitle">发现新版本</h3>
+            <button class="icon" id="update-close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="manual-body">
+            <p class="hint" id="update-text"></p>
+            <div class="update-actions">
+                <button class="primary" id="update-go" type="button" data-i18n="updateGo">去下载</button>
+                <button id="update-later" type="button" data-i18n="updateLater">以后再说</button>
+            </div>
+        </div>
+    </dialog>
+
     <dialog id="manual-dialog">
         <div class="manual-head">
             <h3 data-i18n="manualTitle">用户手册</h3>
@@ -912,6 +929,12 @@
                 version: '版本',
                 getApk: 'APK 下载 / 更新',
                 repo: 'GitHub 仓库',
+                updateTitle: '发现新版本',
+                updateGo: '去下载',
+                updateLater: '以后再说',
+                updateBody: function (current, latest) {
+                    return '当前版本 ' + current + '，最新版本 ' + latest + '。是否前往下载？';
+                },
                 disclaimer: '非官方第三方工具，与游戏开发商、发行商无关；修改游戏文件的风险由使用者自行承担。',
                 manualTitle: '用户手册',
                 manualIntro: '每个控件的作用，按界面从上到下排列。',
@@ -986,6 +1009,12 @@
                 version: 'Version',
                 getApk: 'Download / update APK',
                 repo: 'GitHub repo',
+                updateTitle: 'Update available',
+                updateGo: 'Download',
+                updateLater: 'Later',
+                updateBody: function (current, latest) {
+                    return 'Current version ' + current + ', latest version ' + latest + '. Open the download page?';
+                },
                 disclaimer: 'Unofficial third-party tool, not affiliated with the game developer or publisher. Modifying game files is at your own risk.',
                 manualTitle: 'User manual',
                 manualIntro: 'What each control does, top to bottom.',
@@ -1060,6 +1089,12 @@
                 version: 'Версия',
                 getApk: 'Скачать / обновить APK',
                 repo: 'Репозиторий GitHub',
+                updateTitle: 'Доступно обновление',
+                updateGo: 'Скачать',
+                updateLater: 'Позже',
+                updateBody: function (current, latest) {
+                    return 'Текущая версия ' + current + ', последняя версия ' + latest + '. Открыть страницу загрузки?';
+                },
                 disclaimer: 'Неофициальный сторонний инструмент, не связан с разработчиком или издателем игры. Изменение файлов игры — на ваш риск.',
                 manualTitle: 'Руководство',
                 manualIntro: 'Что делает каждый элемент интерфейса — сверху вниз.',
@@ -1241,7 +1276,7 @@
         const MAX_FONT_SIZE = 100;
 
         // 版本号：日期 + 当天第几次修改；每次改动递增（CI 从这里读版本号打 Release）
-        const APP_VERSION = '2026.10.28.1';
+        const APP_VERSION = '2026.10.28.2';
 
         // 单字变形：w/h 为宽高增量，x/y 为位移，单位均为 px
         const TRANSFORM_KEYS = ['w', 'h', 'x', 'y'];
@@ -2232,6 +2267,65 @@
             }, 180);
         }
 
+        // ---------- 更新检查 ----------
+
+        const REPO_URL = 'https://github.com/i-HatobaTsugu-i/Firefight-Fonts-Generator-Web';
+        const UPDATE_API = REPO_URL.replace('github.com', 'api.github.com/repos') + '/releases/latest';
+        const UPDATE_DISMISS_KEY = 'firefight-font-gen/dismissed-update';
+
+        function compareVersions(a, b) {
+            const pa = String(a).split('.');
+            const pb = String(b).split('.');
+            const len = Math.max(pa.length, pb.length);
+            for (let i = 0; i < len; i++) {
+                const x = parseInt(pa[i] || '0', 10) || 0;
+                const y = parseInt(pb[i] || '0', 10) || 0;
+                if (x !== y) return x - y;
+            }
+            return 0;
+        }
+
+        // APK 的 WebView 打不开外链，交给系统浏览器；网页版开新标签页
+        function openExternal(url) {
+            if (window.AndroidSaver) {
+                window.location.href = url;
+                return;
+            }
+            window.open(url, '_blank', 'noopener');
+        }
+
+        async function checkForUpdate() {
+            try {
+                const response = await fetch(UPDATE_API, { headers: { Accept: 'application/vnd.github+json' } });
+                if (!response.ok) return;
+                const data = await response.json();
+                const latest = String(data.tag_name || '').replace(/^v/, '');
+                if (!latest || compareVersions(latest, APP_VERSION) <= 0) return;
+                try {
+                    if (localStorage.getItem(UPDATE_DISMISS_KEY) === latest) return;
+                } catch (error) {
+                    // 隐私模式下忽略
+                }
+                el('update-dialog').dataset.latest = latest;
+                el('update-text').textContent = t('updateBody')(APP_VERSION, latest);
+                openDialog(el('update-dialog'));
+            } catch (error) {
+                // 离线或接口不可用时静默跳过
+            }
+        }
+
+        function dismissUpdate() {
+            const latest = el('update-dialog').dataset.latest;
+            if (latest) {
+                try {
+                    localStorage.setItem(UPDATE_DISMISS_KEY, latest);
+                } catch (error) {
+                    // 忽略
+                }
+            }
+            closeDialog(el('update-dialog'));
+        }
+
         // ---------- 事件绑定 ----------
 
         TRANSFORM_KEYS.forEach(function (key) {
@@ -2335,6 +2429,15 @@
             saveSettings();
             redraw();
         });
+
+        el('update-go').addEventListener('click', function () {
+            const latest = el('update-dialog').dataset.latest;
+            closeDialog(el('update-dialog'));
+            openExternal(latest ? REPO_URL + '/releases/tag/' + latest : REPO_URL + '/releases/latest');
+        });
+
+        el('update-later').addEventListener('click', dismissUpdate);
+        el('update-close').addEventListener('click', dismissUpdate);
 
         el('layout-trigger').addEventListener('click', function (event) {
             event.stopPropagation();
@@ -2463,6 +2566,7 @@
             moveSelection(false);
 
             await restoreFont();
+            checkForUpdate();
         }
 
         init();

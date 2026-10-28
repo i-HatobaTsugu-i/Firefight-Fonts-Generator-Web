@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Read version
         id: version
@@ -72,10 +74,33 @@ jobs:
           name: apk-${{ steps.version.outputs.value }}
           path: out/*.apk
 
+      - name: Build release notes
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          PREV=$(git tag --sort=-creatordate | head -1)
+          {
+            echo "## 版本 $VERSION"
+            echo ""
+            echo "**下载**：见下方 Assets 里的 \`Firefight-Font-Generator-$VERSION.apk\`"
+            echo ""
+            echo "### 本次更新"
+            if [ -n "$PREV" ]; then
+              git log --no-merges --pretty=format:"- %s" "$PREV..HEAD"
+            else
+              git log --no-merges --pretty=format:"- %s" -20
+            fi
+            echo ""
+            if [ -n "$PREV" ]; then
+              echo ""
+              echo "**完整对比**：https://github.com/${{ github.repository }}/compare/$PREV...$VERSION"
+            fi
+          } > notes.md
+          cat notes.md
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.value }}
           name: ${{ steps.version.outputs.value }}
+          body_path: notes.md
           files: out/*.apk
-          generate_release_notes: true

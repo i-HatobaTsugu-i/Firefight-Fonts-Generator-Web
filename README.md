@@ -10,12 +10,16 @@
 
 不想开浏览器也能用：到 [Releases](https://github.com/i-HatobaTsugu-i/Firefight-Fonts-Generator-Web/releases) 下载最新的 `Firefight-Font-Generator-*.apk` 安装即可。
 
-- APK 就是一个 WebView 壳，内置同一份 `index.html`，**完全离线**、不申请联网权限；
+- APK 就是一个 WebView 壳，内置同一份 `index.html`，**离线可用**；只申请了 `INTERNET` 权限，用于读取 GitHub 最新 Release 检查更新；
 - 界面、功能、三语、自动保存与网页版完全一致；
 - 在 APK 里点「下载 PNG」，导出的 PNG / zip 会直接存到系统的 **下载（Download）** 目录；
 - 选字体文件走系统文件选择器（SAF），不需要额外授予存储权限；
+- 点页脚的 GitHub / 下载链接会交给**系统浏览器**打开，不会在应用内报 `ERR_CACHE_MISS`；
+- 启动时自动比对最新版本，发现新版弹窗询问是否更新（选「以后再说」会记住该版本，不重复打扰）；
 - 页面页脚有版本号、APK 下载 / 更新和仓库入口，方便随时查新版。
 - 安装时系统会提示「未知来源应用」，允许后安装；APK 为 **debug 签名**，仅供侧载，不能上架应用商店。
+
+> 每次发布的 Release 会附带按提交记录自动汇总的更新日志（见 Release 页面正文）。
 
 > 版本号统一为「日期.当天第几次修改」，例如 `2026.10.28.1`，写在 `index.html` 的 `APP_VERSION` 里，页面页脚也会显示。每次把改动推到 `main`，GitHub Actions 会自动读取它编译 APK，并以同名 tag 发布到 Release（改 README 不触发构建）。
 

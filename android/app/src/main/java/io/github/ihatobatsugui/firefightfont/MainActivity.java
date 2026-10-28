@@ -49,6 +49,21 @@ public class MainActivity extends Activity {
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
             }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                Uri uri = request.getUrl();
+                // 内置页面继续交给 AssetLoader
+                if (uri != null && "appassets.androidplatform.net".equals(uri.getHost())) {
+                    return false;
+                }
+                // 其余链接（GitHub 等）交给系统浏览器，避免 WebView 报 ERR_CACHE_MISS
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                } catch (ActivityNotFoundException ignored) {
+                }
+                return true;
+            }
         });
         // 没有 WebChromeClient 的 onShowFileChooser，<input type="file"> 点了不会弹选择器
         webView.setWebChromeClient(new WebChromeClient() {
