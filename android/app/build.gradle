@@ -2,6 +2,10 @@ plugins {
     id 'com.android.application'
 }
 
+// 版本号由 CI 传入（形如 2026.10.28.1），本地直接构建时用占位值
+def appVersionName = (project.findProperty('appVersion') ?: '0.0.0').toString()
+def appVersionDigits = appVersionName.replaceAll('[^0-9]', '')
+
 android {
     namespace 'io.github.ihatobatsugui.firefightfont'
     compileSdk 34
@@ -10,8 +14,8 @@ android {
         applicationId 'io.github.ihatobatsugui.firefightfont'
         minSdk 26
         targetSdk 34
-        versionCode 2
-        versionName '1.0.2'
+        versionCode appVersionDigits ? appVersionDigits.toInteger() : 1
+        versionName appVersionName
     }
 
     buildTypes {

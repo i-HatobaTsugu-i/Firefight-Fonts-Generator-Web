@@ -373,6 +373,28 @@
         }
         .footer-brand { display: flex; align-items: center; gap: 6px; }
         .site-footer svg { width: 15px; height: 15px; display: block; opacity: .85; }
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .footer-version {
+            font-size: 10.5px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .footer-link {
+            font-size: 10.5px;
+            color: var(--muted);
+            text-decoration: none;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px 10px;
+            transition: color .15s ease, border-color .15s ease;
+        }
+        .footer-link:hover { color: var(--ink); border-color: var(--accent); }
         .footer-note { margin: 0; max-width: 32em; font-size: 11px; line-height: 1.55; opacity: .78; }
 
         /* ---------- 手册按钮 ---------- */
@@ -775,6 +797,11 @@
                 <span data-i18n="footer">由 DeepSeek 大肥鱼 生成</span>
             </div>
             <p class="footer-note" data-i18n="disclaimer">非官方第三方工具，与游戏开发商、发行商无关；修改游戏文件的风险由使用者自行承担。</p>
+            <div class="footer-links">
+                <span class="footer-version" id="footer-version"></span>
+                <a class="footer-link" id="footer-apk" href="https://github.com/i-HatobaTsugu-i/Firefight-Fonts-Generator-Web/releases/latest" target="_blank" rel="noopener" data-i18n="getApk">APK 下载 / 更新</a>
+                <a class="footer-link" id="footer-repo" href="https://github.com/i-HatobaTsugu-i/Firefight-Fonts-Generator-Web" target="_blank" rel="noopener" data-i18n="repo">GitHub 仓库</a>
+            </div>
         </footer>
     </div>
 
@@ -882,6 +909,9 @@
                 exportBothDesc: '打包为一个 zip',
                 cancel: '取消',
                 footer: '由 DeepSeek 大肥鱼 生成',
+                version: '版本',
+                getApk: 'APK 下载 / 更新',
+                repo: 'GitHub 仓库',
                 disclaimer: '非官方第三方工具，与游戏开发商、发行商无关；修改游戏文件的风险由使用者自行承担。',
                 manualTitle: '用户手册',
                 manualIntro: '每个控件的作用，按界面从上到下排列。',
@@ -953,6 +983,9 @@
                 exportBothDesc: 'Bundled as one zip',
                 cancel: 'Cancel',
                 footer: 'Made by DeepSeek 大肥鱼',
+                version: 'Version',
+                getApk: 'Download / update APK',
+                repo: 'GitHub repo',
                 disclaimer: 'Unofficial third-party tool, not affiliated with the game developer or publisher. Modifying game files is at your own risk.',
                 manualTitle: 'User manual',
                 manualIntro: 'What each control does, top to bottom.',
@@ -1024,6 +1057,9 @@
                 exportBothDesc: 'Одним zip-архивом',
                 cancel: 'Отмена',
                 footer: 'Сделано DeepSeek 大肥鱼',
+                version: 'Версия',
+                getApk: 'Скачать / обновить APK',
+                repo: 'Репозиторий GitHub',
                 disclaimer: 'Неофициальный сторонний инструмент, не связан с разработчиком или издателем игры. Изменение файлов игры — на ваш риск.',
                 manualTitle: 'Руководство',
                 manualIntro: 'Что делает каждый элемент интерфейса — сверху вниз.',
@@ -1097,6 +1133,7 @@
             syncLabelWidth();
             syncLayoutUI();
             positionSegPill();
+            syncVersionUI();
             updateFontLabel();
             updateInfo();
             renderManual();
@@ -1194,8 +1231,7 @@
         }
 
         const CHAR_WIDTH = 32;
-        const CHAR_HEIGHT = 32;
-        const CHARS_PER_ROW = 16;
+        const CHAR_HEIGHT = 32;        const CHARS_PER_ROW = 16;
         const ATLAS_SIZE = 512;
         const FONT_FAMILY = 'customFont';
         const PREVIEW_SCALE = 8;
@@ -1203,6 +1239,9 @@
         const BASE_FONT_SIZE = 32;
         const MIN_FONT_SIZE = 10;
         const MAX_FONT_SIZE = 100;
+
+        // 版本号：日期 + 当天第几次修改；每次改动递增（CI 从这里读版本号打 Release）
+        const APP_VERSION = '2026.10.28.1';
 
         // 单字变形：w/h 为宽高增量，x/y 为位移，单位均为 px
         const TRANSFORM_KEYS = ['w', 'h', 'x', 'y'];
@@ -1880,6 +1919,10 @@
             el('layout-menu').querySelectorAll('button[data-layout]').forEach(function (button) {
                 button.setAttribute('aria-selected', String(button.dataset.layout === currentLayout));
             });
+        }
+
+        function syncVersionUI() {
+            el('footer-version').textContent = t('version') + ' ' + APP_VERSION;
         }
 
         function setLayout(layout) {

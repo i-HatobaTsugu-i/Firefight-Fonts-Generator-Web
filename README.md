@@ -14,9 +14,10 @@
 - 界面、功能、三语、自动保存与网页版完全一致；
 - 在 APK 里点「下载 PNG」，导出的 PNG / zip 会直接存到系统的 **下载（Download）** 目录；
 - 选字体文件走系统文件选择器（SAF），不需要额外授予存储权限；
+- 页面页脚有版本号、APK 下载 / 更新和仓库入口，方便随时查新版。
 - 安装时系统会提示「未知来源应用」，允许后安装；APK 为 **debug 签名**，仅供侧载，不能上架应用商店。
 
-> APK 由 GitHub Actions 在推送 `v*` 标签（或手动运行 `Build APK and release` 工作流）时自动构建并挂到 Release，构建环境需 Android SDK，因此不在本地打包。
+> 版本号统一为「日期.当天第几次修改」，例如 `2026.10.28.1`，写在 `index.html` 的 `APP_VERSION` 里，页面页脚也会显示。每次把改动推到 `main`，GitHub Actions 会自动读取它编译 APK，并以同名 tag 发布到 Release（改 README 不触发构建）。
 
 ---
 
