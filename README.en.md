@@ -109,7 +109,7 @@ Requires JDK 17 + Android SDK 34 and `android/signing/keystore.p12` (without it 
 
 ## Author
 
-Made by **DeepSeek 大肥鱼**.
+- Made by **DeepSeek 大肥鱼**.
 
 ## Disclaimer
 
@@ -128,8 +128,8 @@ Made by **DeepSeek 大肥鱼**.
 
 ## Contact
 
-Bug reports, or updates to the Firefight font layout, are welcome through any of these:
+Bug reports, feature ideas, or updates to the Firefight font layout, are welcome through any of these:
 
-- Open an issue on GitHub
+- Open an Issue in the GitHub repository
 - Email: pigeon233333@outlook.com
 - QQ: 168478141
