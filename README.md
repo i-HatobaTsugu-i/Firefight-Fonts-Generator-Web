@@ -113,6 +113,6 @@ cd android && gradle assembleDebug                     # 产物：app/build/outp
 
 ## 联系我们
 如果有任何使用bug，或者Firefight字体文件排版更新，可通过下列渠道向我反馈：
->直接在github中向我反馈
->邮箱：pigeon233333@outlook.com
->QQ：168478141
+- 直接在github中向我反馈
+- 邮箱：pigeon233333@outlook.com
+- QQ：168478141
