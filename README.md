@@ -130,8 +130,8 @@ cd android && gradle assembleRelease                   # 产物：app/build/outp
 
 ## 联系我们
 
-如果有任何使用 bug，或者 Firefight 字体文件排版更新，可通过下列渠道向我反馈：
+如果有任何使用 bug，任何功能创意，或者 Firefight 字体文件排版更新，可通过下列渠道向我反馈：
 
-- 直接在 GitHub 中向我反馈
+- 直接在 GitHub 仓库中的Issue向我反馈
 - 邮箱：pigeon233333@outlook.com
 - QQ：168478141
