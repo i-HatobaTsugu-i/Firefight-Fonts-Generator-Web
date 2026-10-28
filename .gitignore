@@ -1,0 +1,7 @@
+.aicode/
+android/.gradle/
+android/app/build/
+android/local.properties
+android/build/
+out/
+*.apk

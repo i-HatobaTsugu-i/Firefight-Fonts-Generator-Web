@@ -1604,7 +1604,37 @@
             return new Blob(parts.concat(central, [end]), { type: 'application/zip' });
         }
 
+        // 在 APK 里没有 <a download> 下载能力，改走原生桥写进系统下载目录
+        function saveViaAndroid(base64, mime, name) {
+            if (!window.AndroidSaver || typeof window.AndroidSaver.saveBase64 !== 'function') return false;
+            try {
+                window.AndroidSaver.saveBase64(base64, mime, name);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function saveDataUrl(dataUrl, name, mime) {
+            if (saveViaAndroid(dataUrl.slice(dataUrl.indexOf(',') + 1), mime, name)) return;
+            const link = document.createElement('a');
+            link.download = name;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function saveBlob(blob, name) {
+            if (window.AndroidSaver) {
+                const reader = new FileReader();
+                reader.onload = function () {
+                    const dataUrl = String(reader.result);
+                    saveViaAndroid(dataUrl.slice(dataUrl.indexOf(',') + 1), blob.type || 'application/octet-stream', name);
+                };
+                reader.readAsDataURL(blob);
+                return;
+            }
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.download = name;
@@ -1628,12 +1658,7 @@
                 }
             });
             if (jobs.length === 1) {
-                const link = document.createElement('a');
-                link.download = jobs[0].name;
-                link.href = exportAtlas(jobs[0].size, jobs[0].bold);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                saveDataUrl(exportAtlas(jobs[0].size, jobs[0].bold), jobs[0].name, 'image/png');
                 return;
             }
             const entries = jobs.map(function (job) {
