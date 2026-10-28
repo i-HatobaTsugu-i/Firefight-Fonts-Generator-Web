@@ -110,8 +110,8 @@ cd android && gradle assembleRelease                   # 产物：app/build/outp
 
 ## 作者
 
-由 **DeepSeek 大肥鱼** 生成。
-~~那个叫九鸟的就是个出钱的蠢货，屁都不懂。~~
+- 由 **DeepSeek 大肥鱼** 生成。
+- ~~那个叫九鸟的就是个出钱的蠢货，屁都不懂。~~
 
 ## 免责声明
 
