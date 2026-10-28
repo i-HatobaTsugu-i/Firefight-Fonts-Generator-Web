@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'README.md'
+      - 'README*.md'
       - '.gitignore'
       - '.aicode/**'
   workflow_dispatch:
