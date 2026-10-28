@@ -2,8 +2,13 @@ package io.github.ihatobatsugui.firefightfont;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -16,8 +21,10 @@ public class MainActivity extends Activity {
 
     // 通过 AssetLoader 用 https 源加载内置页面，localStorage / IndexedDB 才能正常持久化
     private static final String START_URL = "https://appassets.androidplatform.net/assets/index.html";
+    private static final int REQUEST_FONT_FILE = 1001;
 
     private WebView webView;
+    private ValueCallback<Uri[]> pendingFileCallback;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -43,9 +50,54 @@ public class MainActivity extends Activity {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
             }
         });
+        // 没有 WebChromeClient 的 onShowFileChooser，<input type="file"> 点了不会弹选择器
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (pendingFileCallback != null) {
+                    pendingFileCallback.onReceiveValue(null);
+                }
+                pendingFileCallback = callback;
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                try {
+                    startActivityForResult(Intent.createChooser(intent, "选择字体文件"), REQUEST_FONT_FILE);
+                    return true;
+                } catch (ActivityNotFoundException error) {
+                    pendingFileCallback = null;
+                    return false;
+                }
+            }
+        });
 
         setContentView(webView);
         webView.loadUrl(START_URL);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_FONT_FILE) {
+            if (pendingFileCallback == null) {
+                return;
+            }
+            Uri[] uris = null;
+            if (resultCode == RESULT_OK && data != null) {
+                if (data.getData() != null) {
+                    uris = new Uri[]{ data.getData() };
+                } else if (data.getClipData() != null) {
+                    int count = data.getClipData().getItemCount();
+                    uris = new Uri[count];
+                    for (int i = 0; i < count; i++) {
+                        uris[i] = data.getClipData().getItemAt(i).getUri();
+                    }
+                }
+            }
+            pendingFileCallback.onReceiveValue(uris);
+            pendingFileCallback = null;
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
