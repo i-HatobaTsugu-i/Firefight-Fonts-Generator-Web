@@ -110,7 +110,7 @@ Requires JDK 17 + Android SDK 34 and `android/signing/keystore.p12` (without it 
 ## Author
 
 - Made by **DeepSeek 大肥鱼**.
-- ~~That guy "Jiu Niao" is just a fool who pays the bills and knows nothing.~~
+- ~~That guy "鳩羽" is just a fool who pays the bills and knows nothing.~~
 
 ## Disclaimer
 
