@@ -6,6 +6,10 @@ plugins {
 def appVersionName = (project.findProperty('appVersion') ?: '0.0.0').toString()
 def appVersionDigits = appVersionName.replaceAll('[^0-9]', '')
 
+// 固定签名密钥：由 CI 首次构建时生成并提交到 android/signing/keystore.p12
+// 只有用同一把钥匙签名，安装过的旧版本才能被覆盖更新
+def signingStore = rootProject.file('signing/keystore.p12')
+
 android {
     namespace 'io.github.ihatobatsugui.firefightfont'
     compileSdk 34
@@ -18,9 +22,24 @@ android {
         versionName appVersionName
     }
 
+    signingConfigs {
+        release {
+            if (signingStore.exists()) {
+                storeFile signingStore
+                storeType 'PKCS12'
+                storePassword 'firefight'
+                keyAlias 'firefight'
+                keyPassword 'firefight'
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            if (signingStore.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
